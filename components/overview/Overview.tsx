@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
+import { Link } from "expo-router"
 
 export default function Overview() {
   return (
@@ -9,9 +10,11 @@ export default function Overview() {
 
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Overview</Text>
+        <Link href="/(tabs)/Overview/alldata" asChild>
         <TouchableOpacity style={styles.allDataButton}>
           <Text style={styles.allDataText}>📊 All data</Text>
         </TouchableOpacity>
+      </Link>
       </View>
 
       <View style={styles.healthScoreCard}>

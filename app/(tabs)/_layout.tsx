@@ -19,50 +19,86 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    // <Tabs
+    //   screenOptions={{
+    //     tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+    //     // Disable the static render of the header on web
+    //     // to prevent a hydration error in React Navigation v6.
+    //     headerShown: useClientOnlyValue(false, true),
+    //     tabBarPosition: 'bottom'
+    //   }}>
+    //   <Tabs.Screen
+    //     name="Overview"
+    //     options={{
+    //       title: 'Explore',
+    //       tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+    //       headerRight: () => (
+    //         <Link href="/modal" asChild>
+    //           <Pressable>
+    //             {({ pressed }) => (
+    //               <FontAwesome
+    //                 name="info-circle"
+    //                 size={25}
+    //                 color={Colors[colorScheme ?? 'light'].text}
+    //                 style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+    //               />
+    //             )}
+    //           </Pressable>
+    //         </Link>
+    //       ),
+    //     }}
+    //   />
+    //   <Tabs.Screen
+    //     name="Explore"
+    //     options={{
+    //       title: 'Overview',
+    //         tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+    //     }}
+    //   />
+
+    //   <Tabs.Screen
+    //     name="Sharing"
+    //     options={{
+    //       title: 'Sharing',
+    //         tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+    //     }}
+    //   />
+    // </Tabs>
     <Tabs
       screenOptions={{
+        headerShown: false,   // 👈 Ẩn header cho tất cả tab
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-        tabBarPosition: 'bottom'
-      }}>
+        tabBarPosition: 'bottom',
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          headerShown: false, // ẩn riêng header
+          title: '',          // xoá chữ "index"
+          tabBarLabel: 'Overview', // tên hiển thị ở bottom tab
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
       <Tabs.Screen
         name="Overview"
         options={{
-          title: 'Explore',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
         }}
       />
       <Tabs.Screen
         name="Explore"
         options={{
-          title: 'Overview',
-            tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="Sharing"
         options={{
-          title: 'Sharing',
-            tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="share" color={color} />,
         }}
       />
     </Tabs>
+
   );
 }

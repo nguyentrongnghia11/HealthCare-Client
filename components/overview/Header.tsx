@@ -1,22 +1,9 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native"
+import account from "../../assets/images/overview/account.png"
 
 export default function Header() {
   return (
     <View style={styles.container}>
-      <View style={styles.statusBar}>
-        <Text style={styles.time}>9:41</Text>
-        <View style={styles.statusIcons}>
-          <View style={styles.signalBars}>
-            <View style={[styles.bar, styles.bar1]} />
-            <View style={[styles.bar, styles.bar2]} />
-            <View style={[styles.bar, styles.bar3]} />
-            <View style={[styles.bar, styles.bar4]} />
-          </View>
-          <View style={styles.wifi} />
-          <View style={styles.battery} />
-        </View>
-      </View>
-
       <View style={styles.headerContent}>
         <TouchableOpacity style={styles.homeIcon}>
           <View style={styles.homeIconShape} />
@@ -24,9 +11,7 @@ export default function Header() {
 
         <TouchableOpacity style={styles.profileContainer}>
           <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=60&h=60&fit=crop&crop=face",
-            }}
+            source={account}
             style={styles.profileImage}
           />
           <View style={styles.onlineIndicator} />
@@ -72,19 +57,6 @@ const styles = StyleSheet.create({
   bar2: { height: 6 },
   bar3: { height: 8 },
   bar4: { height: 10 },
-  wifi: {
-    width: 15,
-    height: 15,
-    backgroundColor: "#000000",
-    borderRadius: 2,
-    marginRight: 8,
-  },
-  battery: {
-    width: 24,
-    height: 12,
-    backgroundColor: "#000000",
-    borderRadius: 2,
-  },
   headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
