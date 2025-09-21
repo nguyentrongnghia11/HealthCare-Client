@@ -1,28 +1,28 @@
 import React from "react";
-import { TextInput } from "react-native-paper";
+import { TextInput, TextInputProps } from "react-native-paper";
 
-interface InputCustomProps {
+interface InputCustomProps extends TextInputProps {
   label: string;
   value: string;
-  onChange: (text: string) => void;
-  backgroundColor?: string; // 👈 thêm prop
+  onChangeText: (text: string) => void; // 👈 sửa lại đúng tên và kiểu
+  backgroundColor?: string;
 }
 
 const InputCustom: React.FC<InputCustomProps> = ({
   label,
   value,
-  onChange,
+  onChangeText,
   backgroundColor = "#fff",
+  ...rest
 }) => {
   return (
     <TextInput
       label={label}
       value={value}
-      onChangeText={onChange}
+      onChangeText={onChangeText} 
       mode="outlined"
-      style={{
-        backgroundColor, 
-      }}
+      style={[{ backgroundColor }, rest.style]}
+      {...rest}
     />
   );
 };

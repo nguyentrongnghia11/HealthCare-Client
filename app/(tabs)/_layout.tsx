@@ -81,13 +81,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Overview"
         options={{
+          title: 'Overview',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
       <Tabs.Screen
         name="Explore"
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
+          title: 'Explore',
+            tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
       <Tabs.Screen

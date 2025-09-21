@@ -1,41 +1,197 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { FontAwesome5 } from "@expo/vector-icons";
+import React from "react";
+import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { TextInput } from "react-native-paper";
 
-export default function TabOneScreen() {
+const ExploreScreen = () => {
+  const categories = [
+    { id: "1", icon: "apple-alt", label: "Nutrition", color: "#E0F7E9" },
+    { id: "2", icon: "running", label: "Sports", color: "#E6F0FF" },
+    { id: "3", icon: "shoe-prints", label: "Running", color: "#FFF0F5" },
+  ];
+
+  const blogs = [
+    {
+      id: "1",
+      title: "More about Apples: Benefits, nutrition, and tips",
+      category: "Nutrition",
+      image:
+        "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=800&q=60",
+      votes: 78,
+    },
+    {
+      id: "2",
+      title: "The secret of effective morning workout",
+      category: "Lifestyle",
+      image:
+        "https://images.unsplash.com/photo-1598970434795-0c54fe7c0642?auto=format&fit=crop&w=800&q=60",
+      votes: 54,
+    },
+  ];
+
   return (
-    <ScrollView style={styles.container}>
-      <Text>Ngõ chía lộn tên nè, bên này mới là explore</  Text>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Search bar */}
+      <View style={styles.header}>
+        <TextInput
+          mode="outlined"
+          placeholder="Search topic"
+          left={<TextInput.Icon icon="magnify" />}
+          style={styles.searchInput}
+          outlineStyle={{ borderWidth: 0 }}
+        />
+        <TouchableOpacity style={styles.avatarContainer}>
+          <Image
+            source={{
+              uri: "https://randomuser.me/api/portraits/women/44.jpg",
+            }}
+            style={styles.avatar}
+          />
+          <View style={styles.onlineDot} />
+        </TouchableOpacity>
+      </View>
+
+      {/* For You section */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>For you</Text>
+      </View>
+
+      <View style={styles.categoryContainer}>
+        {categories.map((item) => (
+          <View key={item.id} style={[styles.categoryItem, { backgroundColor: item.color }]}>
+            <FontAwesome5 name={item.icon as any} size={24} color="#000" />
+            <Text style={styles.categoryLabel}>{item.label}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Newest Blogs */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Newest blogs</Text>
+        <Text style={styles.viewMore}>View more ›</Text>
+      </View>
+
+      <FlatList
+        horizontal
+        data={blogs}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.blogCard}>
+            <Image source={{ uri: item.image }} style={styles.blogImage} />
+            <View style={styles.blogContent}>
+              <Text style={styles.blogCategory}>{item.category}</Text>
+              <Text style={styles.blogTitle}>{item.title}</Text>
+              <Text style={styles.blogVotes}>💙 {item.votes} votes</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        showsHorizontalScrollIndicator={false}
+      />
+
+      {/* Collection */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Collection</Text>
+        <Text style={styles.viewMore}>View more ›</Text>
+      </View>
     </ScrollView>
   );
-}
+};
+
+export default ExploreScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC', // tương ứng bg-background
-    minHeight: '100%',
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    paddingTop: 40,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
   },
-  headerButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerTitle: {
+  searchInput: {
     flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '600',
+    backgroundColor: "#F4F5F7",
+    borderRadius: 10,
   },
-  headerSpacer: {
+  avatarContainer: {
+    marginLeft: 12,
+  },
+  avatar: {
     width: 40,
+    height: 40,
+    borderRadius: 20,
   },
-  metricsContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-    gap: 12, // React Native 0.71+ hỗ trợ gap, nếu không thì dùng marginBottom cho từng item
+  onlineDot: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 10,
+    height: 10,
+    backgroundColor: "#22C55E",
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    marginTop: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  viewMore: {
+    color: "#6B7280",
+    fontSize: 14,
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  categoryItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  categoryLabel: {
+    marginTop: 6,
+    fontWeight: "500",
+  },
+  blogCard: {
+    width: 220,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginRight: 12,
+    overflow: "hidden",
+    elevation: 2,
+  },
+  blogImage: {
+    width: "100%",
+    height: 120,
+  },
+  blogContent: {
+    padding: 12,
+  },
+  blogCategory: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  blogTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginVertical: 4,
+  },
+  blogVotes: {
+    fontSize: 13,
+    color: "#3B82F6",
   },
 });
