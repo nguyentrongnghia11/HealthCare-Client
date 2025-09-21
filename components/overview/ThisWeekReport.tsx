@@ -1,33 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 
 export default function ThisWeekReport() {
-  const reportData = [
-    {
-      id: 1,
-      icon: "👟",
-      title: "Steps",
-      value: "697,978",
-    },
-    {
-      id: 2,
-      icon: "💪",
-      title: "Workout",
-      value: "6h 45min",
-    },
-    {
-      id: 3,
-      icon: "💧",
-      title: "Water",
-      value: "10,659 ml",
-    },
-    {
-      id: 4,
-      icon: "😴",
-      title: "Sleep",
-      value: "29h 17min",
-    },
-  ]
-
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -38,15 +11,37 @@ export default function ThisWeekReport() {
       </View>
 
       <View style={styles.grid}>
-        {reportData.map((item) => (
-          <View key={item.id} style={styles.reportItem}>
-            <View style={styles.iconContainer}>
-              <Text style={styles.icon}>{item.icon}</Text>
-              <Text style={styles.itemTitle}>{item.title}</Text>
-            </View>
-            <Text style={styles.itemValue}>{item.value}</Text>
+        <View key={1} style={styles.reportItem}>
+          <View style={styles.iconContainer}>
+            <Text style={styles.icon}>👟</Text>
+            <Text style={styles.itemTitle}>Steps</Text>
           </View>
-        ))}
+          <Text style={styles.itemValue}>697,978</Text>
+        </View>
+
+        <View key={2} style={styles.reportItem}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.icon}>💪</Text>
+              <Text style={styles.itemTitle}>Workout</Text>
+            </View>
+            <Text style={styles.itemValue}>6h 45min</Text>
+          </View>
+
+          <View key={3} style={styles.reportItem}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.icon}>💧</Text>
+              <Text style={styles.itemTitle}>Water</Text>
+            </View>
+            <Text style={styles.itemValue}>10,659 ml</Text>
+          </View>
+
+          <View key={4} style={styles.reportItem}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.icon}>😴</Text>
+              <Text style={styles.itemTitle}>Sleep</Text>
+            </View>
+            <Text style={styles.itemValue}>29h 17min</Text>
+          </View>
       </View>
     </View>
   )
@@ -65,7 +60,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#27b315",
   },
   viewMore: {
     fontSize: 14,
@@ -80,6 +75,10 @@ const styles = StyleSheet.create({
   reportItem: {
     width: "48%",
     marginBottom: 20,
+    borderWidth: 1,
+    padding: 5,
+    borderRadius: 10,
+    borderColor: "#27b315",
   },
   iconContainer: {
     flexDirection: "row",

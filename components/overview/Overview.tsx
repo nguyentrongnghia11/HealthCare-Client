@@ -1,20 +1,36 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 import { Link } from "expo-router"
+import React, { use, useEffect, useState } from "react"
 
 export default function Overview() {
+  const [dayName, setDayName] = useState("");
+  const [day, setDay] = useState(0);
+  const [month, setMonth] = useState("");
+  useEffect(() => {
+    const today = new Date();
+
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const dayName = days[today.getDay()];
+    const day = today.getDate();
+    const month = today.getMonth();
+    setDayName(dayName);
+    setDay(day);
+    setMonth(months[month]);
+  }, []);
   return (
     <View style={styles.container}>
       <View style={styles.dateContainer}>
-        <Text style={styles.dateText}>☀️ TUES 11 JUL</Text>
+        <Text style={styles.dateText}>☀️ {dayName} {day} {month}</Text>
       </View>
 
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Overview</Text>
         <Link href="/(tabs)/Overview/alldata" asChild>
-        <TouchableOpacity style={styles.allDataButton}>
-          <Text style={styles.allDataText}>📊 All data</Text>
-        </TouchableOpacity>
-      </Link>
+          <TouchableOpacity style={styles.allDataButton}>
+            <Text style={styles.allDataText}>📊 All data</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
 
       <View style={styles.healthScoreCard}>
@@ -60,7 +76,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#27b315",
   },
   allDataButton: {
     backgroundColor: "#E8F8FF",

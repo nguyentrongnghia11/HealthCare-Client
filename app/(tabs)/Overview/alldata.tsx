@@ -1,7 +1,9 @@
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useRouter } from 'expo-router';
 import { HealthMetricCard } from '../../../components/HealthMetricCard';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'react-native';
+import back from '../../../assets/images/overview/back.png';
+import { Link } from "expo-router"
 
 const healthMetrics = [
   {
@@ -66,8 +68,11 @@ export default function TabOneScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton}>
-        </TouchableOpacity>
+        <Link href="./" asChild>
+          <TouchableOpacity style={styles.headerButton}>
+            <Image source={back} style={styles.headerButton} />
+          </TouchableOpacity>
+        </Link>
         <Text style={styles.headerTitle}>All Health Data</Text>
         <View style={styles.headerSpacer} />
       </View>
@@ -95,13 +100,16 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     padding: 8,
-    marginLeft: -8,
+    width: 30,
+    height: 30,
+    marginBottom: 10,
   },
   headerTitle: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#27b315',
   },
   headerSpacer: {
     width: 40,
