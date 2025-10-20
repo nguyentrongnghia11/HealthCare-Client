@@ -5,11 +5,12 @@ interface ButtonCustomProps {
     icon?: string;
     mode?: 'text' | 'outlined' | 'contained';
     onPress: () => void;
+    children: React.ReactNode
 }
 
-const ButtonCustom: React.FC<ButtonCustomProps> = ({ icon, mode = 'contained', onPress }) => (
+const ButtonCustom: React.FC<ButtonCustomProps> = ({ icon, mode = 'contained', onPress, children }) => (
     <Button icon={icon} mode={mode} onPress={onPress}>
-        Press me
+        {children}
     </Button>
 );
 
