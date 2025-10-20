@@ -1,7 +1,4 @@
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { useRouter } from 'expo-router';
-import { HealthMetricCard } from '../../../components/HealthMetricCard';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
 export default function TabOneScreen() {
   return (
