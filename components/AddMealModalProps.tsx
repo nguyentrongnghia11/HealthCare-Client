@@ -1,14 +1,26 @@
-"use client"
-
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 import { BlurView } from "expo-blur"
+import * as ImagePicker from 'expo-image-picker'
 import React from "react"
-import { Animated, Dimensions, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
+import { Alert, Animated, Dimensions, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
 import { Surface, Text } from "react-native-paper"
+
+import { uploadImage } from "../utils/handleImage"
+
+interface NutritionData {
+  consumed: number
+  total: number
+  percentage: number
+  fat: { value: number; percentage: number }
+  protein: { value: number; percentage: number }
+  carbs: { value: number; percentage: number }
+}
 
 interface AddMealModalProps {
   visible: boolean
-  onDismiss: () => void
+  onDismiss: () => void,
+  nutritionData: NutritionData,
+  setNutritionData: any
 }
 
 type IconName = "image-plus" | "camera" | "pencil"
@@ -57,7 +69,7 @@ const menuOptions: MenuOption[] = [
   },
 ]
 
-export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss }) => {
+export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, nutritionData, setNutritionData }) => {
   const [slideAnim] = React.useState(new Animated.Value(0))
 
   React.useEffect(() => {
@@ -75,12 +87,106 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss }
         useNativeDriver: true,
       }).start()
     }
-  }, [visible])
+  }, [visible, slideAnim])
 
   const translateY = slideAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [Dimensions.get("window").height, 0],
   })
+
+  const handleTakePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Từ chối!', 'Rất tiếc, chúng tôi cần quyền truy cập camera để thực hiện việc này.');
+      return;
+    }
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      if (!result.canceled) {
+        const imageUri = result.assets[0].uri;
+        console.log('Ảnh đã chụp: ', imageUri);
+        onDismiss();
+        await handleUpload(imageUri);
+      }
+    } catch (error) {
+      console.error('Lỗi khi mở camera: ', error);
+      Alert.alert('Lỗi', 'Không thể mở camera.');
+    }
+  }
+
+
+  const handleChoosePhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Từ chối!', 'Rất tiếc, chúng tôi cần quyền truy cập thư viện ảnh để thực hiện việc này.');
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (!result.canceled) {
+        const imageUri = result.assets[0].uri;
+        console.log('Ảnh đã chọn: ', imageUri);
+        onDismiss();
+        await handleUpload(imageUri);
+      }
+    } catch (error) {
+      console.error('Lỗi khi mở thư viện: ', error);
+      Alert.alert('Lỗi', 'Không thể mở thư viện ảnh.');
+    }
+  };
+
+  const handleUpload = async (uri: string) => {
+    Alert.alert('Đang tải lên', 'Vui lòng chờ trong khi ảnh của bạn được tải lên...');
+    try {
+      const responseData = await uploadImage(uri);
+
+      const dataRes = responseData.data
+      console.log('Upload thành công: ', dataRes);
+
+      const { ...newNutritionData } = nutritionData
+
+      newNutritionData.carbs.value = Math.round(dataRes.total_nutrition.carbs_g + nutritionData.carbs.value);
+      newNutritionData.carbs.percentage = Math.round((newNutritionData.carbs.value * 100) / 225);
+
+      newNutritionData.protein.value = Math.round(dataRes.total_nutrition.protein_g + nutritionData.protein.value);
+      newNutritionData.protein.percentage = Math.round((newNutritionData.protein.value * 100) / 150);
+
+      newNutritionData.fat.value = Math.round(dataRes.total_nutrition.fat_g + nutritionData.fat.value);
+      newNutritionData.fat.percentage = Math.round((newNutritionData.fat.value * 100) / 55);
+
+      newNutritionData.consumed = Math.round(newNutritionData.consumed += dataRes.total_nutrition.calories);
+      newNutritionData.percentage = Math.round((newNutritionData.consumed * 100) / 2000);
+
+      console.log ("new nutrition " , newNutritionData)
+
+      setNutritionData(newNutritionData)} catch (error) {
+      console.error('Lỗi khi upload: ', error);
+      Alert.alert('Tải lên thất bại', 'Đã có lỗi xảy ra khi tải ảnh lên.');
+    }
+  };
+
+  const handleOptionPress = (optionId: string) => {
+    if (optionId === 'camera') {
+      handleTakePhoto();
+    } else if (optionId === 'upload') {
+      handleChoosePhoto();
+    } else if (optionId === 'manual') {
+      onDismiss();
+      console.log('Mở màn hình nhập thủ công...');
+    }
+  };
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onDismiss}>
@@ -115,14 +221,11 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss }
                   {menuOptions.map((option, index) => (
                     <TouchableOpacity
                       key={option.id}
-                      onPress={() => {
-                        onDismiss()
-                      }}
+                      onPress={() => handleOptionPress(option.id)} // <-- Sửa từ onDismiss()
                       activeOpacity={0.7}
                       style={{ marginBottom: index === menuOptions.length - 1 ? 0 : 12 }}
                     >
                       <Surface style={styles.optionCard} elevation={0}>
-                        {/* Left: Icon */}
                         <View style={[styles.optionIcon, { backgroundColor: option.bgColor }]}>
                           <MaterialCommunityIcons name={option.icon} size={32} color={option.color} />
                         </View>
@@ -134,7 +237,7 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss }
                         </View>
 
                         {/* Right: Arrow */}
-                        <View style={styles.arrow}>
+                        <View style={[styles.arrow, { backgroundColor: option.bgColor }]}>
                           <MaterialCommunityIcons name="arrow-right" size={20} color={option.color} />
                         </View>
                       </Surface>
@@ -261,7 +364,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: "rgba(38, 198, 218, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },

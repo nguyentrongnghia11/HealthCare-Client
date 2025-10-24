@@ -7,36 +7,44 @@ interface ProgressCircleProps {
   consumed: number
   goal: number
   percentage: number
-  fat: number
-  protein: number
-  carbs: number
+  fat: number    
+  protein: number  
+  carbs: number   
 }
 
 export const ProgressCircle: React.FC<ProgressCircleProps> = ({ consumed, goal, percentage, fat, protein, carbs }) => {
   const size = 220
   const strokeWidth = 18
   const radius = (size - strokeWidth) / 2
-  const circumference = 2 * Math.PI * radius
-
-  const getStrokeDashoffset = (percent: number) => {
-    return circumference - (circumference * percent) / 100
+  
+  const getStrokeDashoffset = (percent: number, currentCircumference: number) => {
+    
+    return currentCircumference - (currentCircumference * percent) / 100
   }
 
   const renderCircleLayer = (percent: number, color: string, index: number) => {
-    const offset = 2 * Math.PI * radius * (index * 0.15)
+ 
+    const currentRadius = radius - index * 22
+    
+    const currentCircumference = 2 * Math.PI * currentRadius
+
     return (
       <Circle
         key={`layer-${index}`}
         cx={size / 2}
         cy={size / 2}
-        r={radius - index * 22}
+        r={currentRadius} 
         fill="none"
         stroke={color}
         strokeWidth={strokeWidth}
-        strokeDasharray={circumference - index * 2 * Math.PI * 22}
-        strokeDashoffset={getStrokeDashoffset(percent)}
+        strokeDasharray={currentCircumference} 
+        strokeDashoffset={getStrokeDashoffset(percent, currentCircumference)} 
         strokeLinecap="round"
         opacity={0.85}
+        
+        originX={size / 2}
+        originY={size / 2}
+        rotation="-90"
       />
     )
   }
@@ -74,17 +82,20 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({ consumed, goal, 
             opacity={0.3}
           />
 
-          {/* Progress circles */}
-          {renderCircleLayer(carbs, "#00D4D4", 0)}
+          {/* Progress circles (thứ tự vẽ rất quan trọng) */}
+          {/* Vòng ngoài cùng (Carbs) được vẽ trước */}
+          {renderCircleLayer(carbs, "#00D4D4", 0)} 
+          {/* Vòng giữa (Protein) */}
           {renderCircleLayer(protein, "#EE5A6F", 1)}
+          {/* Vòng trong cùng (Fat) vẽ sau cùng */}
           {renderCircleLayer(fat, "#FF9F43", 2)}
 
           {/* Center text */}
-          <SvgText x={size / 2} y={size / 2 - 12} textAnchor="middle" fontSize="48" fontWeight="700" fill="#000">
-            {percentage}%
+          <SvgText x={size / 2} y={size / 2 - 12} textAnchor="middle" fontSize="38" fontWeight="700" fill="#000">
+            {percentage} %
           </SvgText>
-          <SvgText x={size / 2} y={size / 2 + 20} textAnchor="middle" fontSize="12" fill="#999" fontWeight="500">
-            of {goal} kcal
+          <SvgText x={size / 3} y={size / 2 + 20} textAnchor="middle" fontSize="18" fill="#999" fontWeight="500">
+            of   {goal} kcal
           </SvgText>
         </Svg>
       </View>
@@ -98,6 +109,7 @@ export const ProgressCircle: React.FC<ProgressCircleProps> = ({ consumed, goal, 
     </View>
   )
 }
+
 
 interface LegendItemProps {
   color: string

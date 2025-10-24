@@ -24,13 +24,13 @@ export default function NutritionScreen() {
     const theme = useTheme()
     const [showAddMealModal, setShowAddMealModal] = useState(false)
 
-    const [nutritionData] = useState<NutritionData>({
-        consumed: 960,
-        total: 1300,
-        percentage: 60,
-        fat: { value: 80, percentage: 40 },
-        protein: { value: 160, percentage: 56 },
-        carbs: { value: 230, percentage: 62 },
+    const [nutritionData, setNutritionData] = useState<NutritionData>({
+        consumed: 0,
+        total: 2000,
+        percentage: 0,
+        fat: { value: 0, percentage: 0 },
+        protein: { value: 0, percentage: 0 },
+        carbs: { value: 0, percentage: 0 },
     })
 
     const handleAddMeal = (type: "photo" | "camera" | "manual") => {
@@ -86,12 +86,12 @@ export default function NutritionScreen() {
                 {/* Circular Progress Chart */}
                 <View style={styles.chartContainer}>
                     <ProgressCircle
-                        carbs={100}
-                        fat={100}
-                        percentage={50}
-                        protein={400}
-                        consumed={444}
-                        goal={3000}
+                        carbs={nutritionData.carbs.percentage}
+                        fat={nutritionData.fat.percentage}
+                        percentage={nutritionData.percentage}
+                        protein={nutritionData.protein.percentage}
+                        consumed={nutritionData.consumed}
+                        goal={2000}
 
                     />
                 </View>
@@ -143,7 +143,9 @@ export default function NutritionScreen() {
             <AddMealModal
                 visible={showAddMealModal}
                 onDismiss={() => setShowAddMealModal(false)}
-                // onSelectOption={handleAddMeal}
+                nutritionData={nutritionData}
+                setNutritionData={setNutritionData}
+            // onSelectOption={handleAddMeal}
             />
         </View>
     )
