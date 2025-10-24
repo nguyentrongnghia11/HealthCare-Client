@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
-
+import { useRouter } from "expo-router"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 export default function Highlights() {
+   const router = useRouter()
   const highlightData = [
     {
       id: 1,
@@ -18,6 +19,7 @@ export default function Highlights() {
       updateText: "updated 30m ago",
       backgroundColor: "#FF6B6B",
       icon: "📅",
+      link: "/(tabs)/Overview/cycletracking" ,
     },
     {
       id: 3,
@@ -49,7 +51,11 @@ export default function Highlights() {
 
       <View style={styles.grid}>
         {highlightData.map((item) => (
-          <TouchableOpacity key={item.id} style={[styles.card, { backgroundColor: item.backgroundColor }]}>
+          <TouchableOpacity key={item.id} style={[styles.card, { backgroundColor: item.backgroundColor }]}
+           onPress={() => {
+  if (item.link) router.push({ pathname: item.link as any });
+}}
+>
             <View style={styles.cardHeader}>
               <Text style={styles.cardIcon}>{item.icon}</Text>
             </View>
