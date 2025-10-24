@@ -1,7 +1,7 @@
-
+  
 import { useRouter } from 'expo-router';
 import { View } from '../../../components/Themed';
-import Test from '../Overview/alldata';
+import SharingScreen from './SharingScreen';
 
 export default function TabOneScreen() {
 
@@ -12,7 +12,7 @@ export default function TabOneScreen() {
   }
   return (
     <View >
-      <Test />
+      <SharingScreen />
     </View>
   );
 }

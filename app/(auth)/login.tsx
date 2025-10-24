@@ -23,13 +23,14 @@ export default function LoginScreen() {
           
          label='Email'
          value=''
-         onChange={() => {}}
+         onChangeText={() => {}}
+
         />
         <InputCustom
           
          label='Email'
          value=''
-         onChange={() => {}}
+         onChangeText={() => {}}
         />
         <TouchableOpacity>
           <Text style={styles.forgotPassword}>Forgot your password?</Text>

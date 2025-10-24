@@ -1,9 +1,11 @@
 import { FontAwesome5 } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-paper";
 
 const ExploreScreen = () => {
+
   const categories = [
     { id: "1", icon: "apple-alt", label: "Nutrition", color: "#E0F7E9" },
     { id: "2", icon: "running", label: "Sports", color: "#E6F0FF" },
@@ -28,6 +30,12 @@ const ExploreScreen = () => {
       votes: 54,
     },
   ];
+
+  const handleCategoryPress = (item: { id: string; label: string }) => {
+    console.log("Category clicked:", item.label);
+    // 👉 Bạn có thể điều hướng sang màn hình khác, ví dụ:
+    router.push(`/(tabs)/Explore/nutrition`);
+  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -58,11 +66,17 @@ const ExploreScreen = () => {
 
       <View style={styles.categoryContainer}>
         {categories.map((item) => (
-          <View key={item.id} style={[styles.categoryItem, { backgroundColor: item.color }]}>
+          <TouchableOpacity
+            key={item.id}
+            style={[styles.categoryItem, { backgroundColor: item.color }]}
+            activeOpacity={0.7}
+            onPress={() => handleCategoryPress(item)}
+          >
             <FontAwesome5 name={item.icon as any} size={24} color="#000" />
             <Text style={styles.categoryLabel}>{item.label}</Text>
-          </View>
+          </TouchableOpacity>
         ))}
+
       </View>
 
       {/* Newest Blogs */}
