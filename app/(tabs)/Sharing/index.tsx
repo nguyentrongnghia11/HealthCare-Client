@@ -1,9 +1,7 @@
-
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+  
 import { useRouter } from 'expo-router';
-import ButtonCustom from '../../../components/Button';
-import { Text, View } from '../../../components/Themed';
-import Test from '../Overview/alldata'; 
+import { View } from '../../../components/Themed';
+import SharingScreen from './SharingScreen';
 
 export default function TabOneScreen() {
 
@@ -14,7 +12,7 @@ export default function TabOneScreen() {
   }
   return (
     <View >
-      <Test />
+      <SharingScreen />
     </View>
   );
 }
