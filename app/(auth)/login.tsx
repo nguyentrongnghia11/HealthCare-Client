@@ -1,160 +1,324 @@
-import React from 'react';
+"use client"
+
+import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { router } from "expo-router"
+import { useState } from "react"
 import {
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View
-} from 'react-native';
-import InputCustom from '../../components/InputCustom';
+} from "react-native"
+import { Checkbox, Text, TextInput } from "react-native-paper"
+import { login } from "../../api/auth/auth"
+
 
 export default function LoginScreen() {
+  const [identifier, setIdentifier] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+
+  const handleLogin = async () => {
+    const res = await login({ identifier, password })
+
+    if (!res) {
+      alert("Dang nhap khong thanh cong ");
+    }
+    else {
+      router.push("/(tabs)/Explore")
+    }
+  }
+
+  const handleSocialLogin = (provider: string) => {
+    console.log(`Login with ${provider}`)
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Phần trên cùng với tiêu đề và mô tả */}
-      <View style={styles.header}>
-        <Text style={styles.mainTitle}>Login here</Text>
-        <Text style={styles.subTitle}>Welcome back you've been missed!</Text>
-      </View>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flex}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Header Section */}
+          <View style={styles.header}>
+            <View style={styles.headerIcon}>
+              <MaterialCommunityIcons name="heart-pulse" size={48} color="#00BDD4" />
+            </View>
+            <Text style={styles.mainTitle}>Login</Text>
+            <Text style={styles.subTitle}>Login to continue your health journey</Text>
+          </View>
 
-      {/* Phần nhập liệu Email và Password */}
-      <View style={styles.formContainer}>
-        <InputCustom
-          
-         label='Email'
-         value=''
-         onChangeText={() => {}}
+          {/* Form Section */}
+          <View style={styles.formContainer}>
+            {/* Email Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.label}>Email Address</Text>
+              <View style={styles.inputField}>
+                <MaterialCommunityIcons name="email-outline" size={20} color="#00BDD4" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your email"
+                  placeholderTextColor="#BDBDBD"
+                  value={identifier}
+                  onChangeText={setIdentifier}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  underlineColor="transparent"
+                  activeUnderlineColor="transparent"
+                />
+              </View>
+            </View>
 
-        />
-        <InputCustom
-          
-         label='Email'
-         value=''
-         onChangeText={() => {}}
-        />
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>Forgot your password?</Text>
-        </TouchableOpacity>
-      </View>
+            {/* Password Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.inputField}>
+                <MaterialCommunityIcons name="lock-outline" size={20} color="#00BDD4" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#BDBDBD"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  underlineColor="transparent"
+                  activeUnderlineColor="transparent"
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <MaterialCommunityIcons
+                    name={showPassword ? "eye-outline" : "eye-off-outline"}
+                    size={20}
+                    color="#00BDD4"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
 
-      {/* Nút Đăng nhập */}
-      <TouchableOpacity style={styles.signInButton}>
-        <Text style={styles.signInText}>Sign in</Text>
-      </TouchableOpacity>
+            {/* Remember Me & Forgot Password */}
+            <View style={styles.optionsRow}>
+              <View style={styles.rememberMe}>
+                <Checkbox
+                  status={rememberMe ? "checked" : "unchecked"}
+                  onPress={() => setRememberMe(!rememberMe)}
+                  color="#00BDD4"
+                />
+                <Text style={styles.rememberText}>Remember me</Text>
+              </View>
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot password?</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-      <TouchableOpacity style={styles.createAccount}>
-        <Text style={styles.createAccountText}>Create new account</Text>
-      </TouchableOpacity>
+          {/* Sign In Button */}
+          <TouchableOpacity style={styles.signInButton} activeOpacity={0.8} onPress={handleLogin}>
+            <MaterialCommunityIcons name="login" size={22} color="#FFFFFF" style={styles.buttonIcon} />
+            <Text style={styles.signInText}>Sign In</Text>
+          </TouchableOpacity>
 
-      <View style={styles.orContinueWithContainer}>
-        <Text style={styles.orContinueWithText}>Or continue with</Text>
-      </View>
+          {/* Create Account */}
+          <View style={styles.createAccountContainer}>
+            <Text style={styles.createAccountText}>Don't have an account? </Text>
+            <TouchableOpacity>
+              <Text style={styles.createAccountLink}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
 
-      {/* Các nút đăng nhập mạng xã hội */}
-      <View style={styles.socialLoginContainer}>
-        <TouchableOpacity style={styles.socialButton}>
-          {/* Thay thế bằng icon Google */}
-          <Text style={styles.socialIcon}>G</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          {/* Thay thế bằng icon Facebook */}
-          <Text style={styles.socialIcon}>f</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          {/* Thay thế bằng icon Apple */}
-          <Text style={styles.socialIcon}></Text>
-        </TouchableOpacity>
-      </View>
+          {/* Divider */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>Or continue with</Text>
+            <View style={styles.divider} />
+          </View>
+
+          {/* Social Login Buttons */}
+          <View style={styles.socialContainer}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              activeOpacity={0.7}
+              onPress={() => handleSocialLogin("Google")}
+            >
+              <MaterialCommunityIcons name="google" size={24} color="#EA4335" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.socialButton}
+              activeOpacity={0.7}
+              onPress={() => handleSocialLogin("Facebook")}
+            >
+              <MaterialCommunityIcons name="facebook" size={24} color="#1877F2" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.socialButton}
+              activeOpacity={0.7}
+              onPress={() => handleSocialLogin("Apple")}
+            >
+              <MaterialCommunityIcons name="apple" size={24} color="#000000" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.spacer} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDF7F5', // Màu nền tổng thể tương tự ảnh
-    paddingHorizontal: 20,
-    paddingTop: 50,
+    backgroundColor: "#FFFFFF",
+  },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingVertical: 20,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
+    marginTop: 20,
+  },
+  headerIcon: {
+    marginBottom: 16,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#E0F7FA",
+    justifyContent: "center",
+    alignItems: "center",
   },
   mainTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FF6F3D', // Màu cam đậm
-    marginBottom: 10,
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#212121",
+    marginBottom: 8,
   },
   subTitle: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
+    fontSize: 14,
+    color: "#757575",
+    textAlign: "center",
   },
   formContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
+  },
+  inputWrapper: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#212121",
+    marginBottom: 8,
+  },
+  inputField: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   input: {
-    backgroundColor: '#F9F9F9', // Màu nền nhạt cho input
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    borderColor: '#E0E0E0',
-    borderWidth: 1,
+    flex: 1,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: "#212121",
+    backgroundColor: "transparent",
+  },
+  optionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  rememberMe: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  rememberText: {
+    fontSize: 14,
+    color: "#424242",
+    marginLeft: 4,
   },
   forgotPassword: {
-    color: '#FF6F3D', // Màu cam cho quên mật khẩu
-    textAlign: 'right',
-    marginBottom: 20,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#00BDD4",
   },
   signInButton: {
-    backgroundColor: '#FF6F3D', // Màu cam đậm cho nút Đăng nhập
-    borderRadius: 10,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginBottom: 20,
+    backgroundColor: "#00BDD4",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    shadowColor: "#00BDD4",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    marginBottom: 16,
+  },
+  buttonIcon: {
+    marginRight: 8,
   },
   signInText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
   },
-  createAccount: {
-    alignItems: 'center',
-    marginBottom: 40,
+  createAccountContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
   },
   createAccountText: {
-    color: '#555',
-    fontSize: 16,
-  },
-  orContinueWithContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  orContinueWithText: {
-    color: '#888',
     fontSize: 14,
+    color: "#757575",
   },
-  socialLoginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 15, // Khoảng cách giữa các nút
+  createAccountLink: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#00BDD4",
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E0E0E0",
+  },
+  dividerText: {
+    fontSize: 12,
+    color: "#BDBDBD",
+    marginHorizontal: 12,
+  },
+  socialContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 16,
+    marginBottom: 16,
   },
   socialButton: {
-    backgroundColor: '#F9F9F9',
-    borderRadius: 10,
-    padding: 15,
     width: 60,
     height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: '#E0E0E0',
+    borderRadius: 12,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
-  socialIcon: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#555',
+  spacer: {
+    height: 40,
   },
-});
+})
