@@ -12,9 +12,9 @@ export const register = async (formData: any) => {
     try {
         const response: Response = await fetch(serverUrl, {
             method: 'POST',
-            body: formData,
+            body: JSON.stringify(formData),
             headers: {
-                'Content-Type': 'multipart/form-data',
+                'Content-Type': 'application/json',
             },
         });
 
@@ -38,14 +38,15 @@ export const register = async (formData: any) => {
 }
 
 export const verifyRegister = async (formData: any) => {
+    console.log (formData)
     const serverUrl = 'http://10.234.168.160:3000/user';
 
     try {
         const response: Response = await fetch(serverUrl, {
             method: 'POST',
-            body: formData,
+            body: JSON.stringify(formData),
             headers: {
-                'Content-Type': 'multipart/form-data',
+                'Content-Type': 'application/json',
             },
         });
 
@@ -77,14 +78,14 @@ export const login = async (formData: any) => {
     //   "password": "trongnghia599"
     // }
 
-    console.log ("day la form data ", formData)
+    console.log("day la form data ", formData)
 
     try {
         const response: Response = await fetch(serverUrl, {
             method: 'POST',
             body: JSON.stringify(formData),
             headers: {
-                 'Content-Type': 'application/json',
+                'Content-Type': 'application/json',
             },
         });
 
