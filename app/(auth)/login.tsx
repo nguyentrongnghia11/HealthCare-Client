@@ -5,13 +5,13 @@ import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-si
 import { router } from "expo-router"
 import { useEffect, useState } from "react"
 import {
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from "react-native"
 import { Checkbox, Text, TextInput } from "react-native-paper"
 import { login } from "../../api/auth/auth"
@@ -35,7 +35,6 @@ export default function LoginScreen() {
   }
 
   useEffect(() => {
-    // Configure Google Signin with the web client id from your google-services.json
     GoogleSignin.configure({
       webClientId: '103191199587-vgn4vvs8id2slu1hdtka99feb3tunsek.apps.googleusercontent.com',
       offlineAccess: true,
@@ -45,9 +44,16 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
+      
+      try {
+        await GoogleSignin.signOut()
+      } catch (e) {
+        // ignore signOut errors — proceed to signIn
+        console.debug('Google signOut (ignored) error', e)
+      }
+
       const userInfo = await GoogleSignin.signIn()
-      // userInfo contains idToken and user data. Send idToken to backend if needed.
-      // Example: await loginWithGoogle({ idToken: userInfo.idToken })
+
       console.log('Google user:', userInfo)
       router.push("/(tabs)/Explore")
     } catch (error: any) {
