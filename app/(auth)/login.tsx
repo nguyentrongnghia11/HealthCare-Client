@@ -1,16 +1,17 @@
 "use client"
 
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin'
 import { router } from "expo-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from "react-native"
 import { Checkbox, Text, TextInput } from "react-native-paper"
 import { login } from "../../api/auth/auth"
@@ -30,6 +31,37 @@ export default function LoginScreen() {
     }
     else {
       router.push("/(tabs)/Explore")
+    }
+  }
+
+  useEffect(() => {
+    // Configure Google Signin with the web client id from your google-services.json
+    GoogleSignin.configure({
+      webClientId: '103191199587-vgn4vvs8id2slu1hdtka99feb3tunsek.apps.googleusercontent.com',
+      offlineAccess: true,
+    })
+  }, [])
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
+      const userInfo = await GoogleSignin.signIn()
+      // userInfo contains idToken and user data. Send idToken to backend if needed.
+      // Example: await loginWithGoogle({ idToken: userInfo.idToken })
+      console.log('Google user:', userInfo)
+      router.push("/(tabs)/Explore")
+    } catch (error: any) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+        console.log('User cancelled google sign in')
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Sign in in progress')
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        alert('Google Play Services not available or outdated')
+      } else {
+        console.error(error)
+        alert('Google sign-in error')
+      }
     }
   }
 
@@ -138,7 +170,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={styles.socialButton}
               activeOpacity={0.7}
-              onPress={() => handleSocialLogin("Google")}
+              onPress={handleGoogleSignIn}
             >
               <MaterialCommunityIcons name="google" size={24} color="#EA4335" />
             </TouchableOpacity>
