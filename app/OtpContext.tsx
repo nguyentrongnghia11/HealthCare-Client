@@ -16,7 +16,7 @@ type OtpContextType = {
 const OtpContext = createContext<OtpContextType | undefined>(undefined);
 
 // Provider component
-export const OtpProvider = ({ children }: { children: ReactNode }) => {
+export default function OtpProvider  ({ children }: { children: ReactNode }) {
   const [otpData, setOtpData] = useState<OtpData>({});
   return (
     <OtpContext.Provider value={{ otpData, setOtpData }}>

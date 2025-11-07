@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '../components/useColorScheme';
-import { OtpProvider } from './OtpContext';
+import OtpProvider from './OtpContext';
 
 export {
   // Catch any errors thrown by the Layout component.

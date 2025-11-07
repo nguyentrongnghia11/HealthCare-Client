@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "103191199587",
+    "project_id": "musicapp-ec944",
+    "storage_bucket": "musicapp-ec944.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103191199587:android:befe0b76cc218a4ec91d56",
+        "android_client_info": {
+          "package_name": "com.heathcareapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "103191199587-t8ni43olctd2apda4eok0eo3h6pf8987.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.heathcareapp",
+            "certificate_hash": "7d7be9cdbc39f49679a950f79a1bb59dbb058a72"
+          }
+        },
+        {
+          "client_id": "103191199587-vgn4vvs8id2slu1hdtka99feb3tunsek.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwgr8GLlpWdb9icXbJnkvYbiokUbDJa40"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "103191199587-vgn4vvs8id2slu1hdtka99feb3tunsek.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
