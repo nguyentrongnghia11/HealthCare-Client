@@ -29,6 +29,8 @@
         "android.permission.RECORD_AUDIO"
       ]
     },
+  "facebookAppId": "819974580826983",
+  "facebookDisplayName": "HealthCareApp",
     "web": {
       "bundler": "metro",
       "output": "static",

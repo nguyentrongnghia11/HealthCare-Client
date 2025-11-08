@@ -13,8 +13,9 @@ import {
   TouchableOpacity,
   View
 } from "react-native"
+import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import { Checkbox, Text, TextInput } from "react-native-paper"
-import { login } from "../../api/auth/auth"
+import { login, loginGoogle } from "../../api/auth/auth"
 
 
 export default function LoginScreen() {
@@ -44,7 +45,7 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
-      
+
       try {
         await GoogleSignin.signOut()
       } catch (e) {
@@ -52,10 +53,21 @@ export default function LoginScreen() {
         console.debug('Google signOut (ignored) error', e)
       }
 
-      const userInfo = await GoogleSignin.signIn()
+      const userInfo: any = await GoogleSignin.signIn()
 
-      console.log('Google user:', userInfo)
-      router.push("/(tabs)/Explore")
+      const res = await loginGoogle(userInfo.data.idToken)
+
+      if (res !== null) {
+
+        console.log('Google user:', userInfo)
+        router.push("/(tabs)/Overview")
+      }
+
+      else {
+        console.log ("Dang nhap khong thanh cong !")
+
+      }
+
     } catch (error: any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
@@ -73,6 +85,34 @@ export default function LoginScreen() {
 
   const handleSocialLogin = (provider: string) => {
     console.log(`Login with ${provider}`)
+  }
+
+  const handleFacebookLogin = async () => {
+    try {
+      const result = await LoginManager.logInWithPermissions(['public_profile', 'email'])
+
+      if (result.isCancelled) {
+        console.log('Facebook login cancelled')
+        return
+      }
+
+      const data = await AccessToken.getCurrentAccessToken()
+      if (!data) {
+        alert('Failed to obtain access token from Facebook')
+        return
+      }
+
+      const accessToken = data.accessToken
+      console.log('Facebook access token:', accessToken)
+
+      // Send accessToken to your backend for verification / to create a session.
+      // Example: await loginWithFacebook({ accessToken })
+
+      router.push('/(tabs)/Explore')
+    } catch (e) {
+      console.error('Facebook login error', e)
+      alert('Facebook login failed')
+    }
   }
 
   return (
@@ -183,7 +223,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={styles.socialButton}
               activeOpacity={0.7}
-              onPress={() => handleSocialLogin("Facebook")}
+              onPress={handleFacebookLogin}
             >
               <MaterialCommunityIcons name="facebook" size={24} color="#1877F2" />
             </TouchableOpacity>

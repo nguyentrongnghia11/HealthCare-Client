@@ -1,3 +1,4 @@
+import instance from "../../utils/axiosInstance";
 
 
 
@@ -38,7 +39,7 @@ export const register = async (formData: any) => {
 }
 
 export const verifyRegister = async (formData: any) => {
-    console.log (formData)
+    console.log(formData)
     const serverUrl = 'http://10.234.168.160:3000/user';
 
     try {
@@ -106,6 +107,15 @@ export const login = async (formData: any) => {
         console.error('Lỗi khi upload: ', errorMessage);
         throw new Error(errorMessage);
     }
+}
+
+
+export const loginGoogle = async (idToken: string) => {
+
+    console.log ("day la token ", idToken)
+    const res = await instance.post("/auth/google", { idToken});
+
+    return res.data
 }
 
 
