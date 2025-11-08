@@ -7,14 +7,11 @@
     "icon": "./assets/images/icon.png",
     "scheme": "heathcarecli",
     "userInterfaceStyle": "automatic",
-  "newArchEnabled": true,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
     },
     "android": {
       "package": "com.heathcareapp",
@@ -27,7 +24,14 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "config": {
+        "googleSignIn": {
+          "certificateHash": ""
+        },
+        "facebookAppId": "819974580826983",
+        "facebookDisplayName": "HealthCareApp"
+      }
     },
     "web": {
       "bundler": "metro",

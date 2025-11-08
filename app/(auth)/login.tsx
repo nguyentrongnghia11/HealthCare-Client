@@ -13,9 +13,11 @@ import {
   TouchableOpacity,
   View
 } from "react-native"
-import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import { Checkbox, Text, TextInput } from "react-native-paper"
 import { login, loginGoogle } from "../../api/auth/auth"
+// import FacebookLoginButton from "../../components/FacebookLoginButton"
+
+import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 
 
 export default function LoginScreen() {
@@ -89,6 +91,8 @@ export default function LoginScreen() {
 
   const handleFacebookLogin = async () => {
     try {
+      // Attempt a login using the native Facebook SDK
+      // LoginManager.c
       const result = await LoginManager.logInWithPermissions(['public_profile', 'email'])
 
       if (result.isCancelled) {
