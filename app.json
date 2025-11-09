@@ -3,6 +3,7 @@
     "name": "heath_care_cli",
     "slug": "heath_care_cli",
     "version": "1.0.0",
+    "owner": "trongnghia599",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "heathcarecli",
@@ -13,6 +14,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
       "package": "com.heathcareapp",
       "googleServicesFile": "./google-services.json",
@@ -20,18 +24,30 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "musicapp-ec944.firebaseapp.com"
+            },
+            {
+              "scheme": "https",
+              "host": "musicapp-ec944.web.app"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO"
-      ],
-      "config": {
-        "googleSignIn": {
-          "certificateHash": ""
-        },
-        "facebookAppId": "819974580826983",
-        "facebookDisplayName": "HealthCareApp"
-      }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -47,7 +63,16 @@
           "cameraPermission": "Ứng dụng cần quyền truy cập camera để bạn có thể chụp ảnh bữa ăn của mình."
         }
       ],
-      "expo-web-browser"
+      [
+        "react-native-fbsdk-next",
+        {
+          "appId": "819974580826983",
+          "appID": "819974580826983",
+          "clientToken": "73e4787e530a404f71ba0a295d61d88d", 
+          "displayName": "heath_care_cli",
+          "scheme": "fb819974580826983"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

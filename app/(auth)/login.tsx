@@ -15,10 +15,13 @@ import {
 } from "react-native"
 import { Checkbox, Text, TextInput } from "react-native-paper"
 import { login, loginGoogle } from "../../api/auth/auth"
-// import FacebookLoginButton from "../../components/FacebookLoginButton"
 
+// THAY THẾ bằng SDK NATIVE
 import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 
+import * as WebBrowser from 'expo-web-browser'
+// import * as Facebook from 'expo-auth-session/providers/facebook' // ĐÃ XÓA
+// import { makeRedirectUri } from 'expo-auth-session' // ĐÃ XÓA
 
 export default function LoginScreen() {
   const [identifier, setIdentifier] = useState("")
@@ -42,6 +45,7 @@ export default function LoginScreen() {
       webClientId: '103191199587-vgn4vvs8id2slu1hdtka99feb3tunsek.apps.googleusercontent.com',
       offlineAccess: true,
     })
+    WebBrowser.maybeCompleteAuthSession();
   }, [])
 
   const handleGoogleSignIn = async () => {
@@ -51,12 +55,10 @@ export default function LoginScreen() {
       try {
         await GoogleSignin.signOut()
       } catch (e) {
-        // ignore signOut errors — proceed to signIn
         console.debug('Google signOut (ignored) error', e)
       }
 
       const userInfo: any = await GoogleSignin.signIn()
-
       const res = await loginGoogle(userInfo.data.idToken)
 
       if (res !== null) {
@@ -66,8 +68,7 @@ export default function LoginScreen() {
       }
 
       else {
-        console.log ("Dang nhap khong thanh cong !")
-
+        console.log("Dang nhap khong thanh cong !")
       }
 
     } catch (error: any) {
@@ -85,37 +86,39 @@ export default function LoginScreen() {
     }
   }
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`)
-  }
+  // ĐÃ XÓA: useAuthRequest cũ
+  // const [fbRequest, fbResponse, fbPromptAsync] = Facebook.useAuthRequest(...)
+
+  // ĐÃ XÓA: useEffect theo dõi fbResponse cũ
 
   const handleFacebookLogin = async () => {
     try {
-      // Attempt a login using the native Facebook SDK
-      // LoginManager.c
-      const result = await LoginManager.logInWithPermissions(['public_profile', 'email'])
+      // Bắt đầu quá trình đăng nhập bằng SDK native
+      const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
 
       if (result.isCancelled) {
-        console.log('Facebook login cancelled')
-        return
+        console.log('Facebook login cancelled by user.');
+        return;
       }
 
-      const data = await AccessToken.getCurrentAccessToken()
-      if (!data) {
-        alert('Failed to obtain access token from Facebook')
-        return
+      // Lấy Access Token sau khi đăng nhập thành công
+      const data = await AccessToken.getCurrentAccessToken();
+
+      if (data) {
+        const access_token = data.accessToken;
+        console.log('Facebook Access Token (fbsdk-next):', access_token);
+        
+        // --- BƯỚC XỬ LÝ TOKEN: Cần dùng access_token này để xác thực với Backend hoặc Firebase ---
+        
+        // Ví dụ: Đăng nhập thành công, chuyển hướng
+        router.push('/(tabs)/Explore');
+      } else {
+        alert('Không thể lấy Access Token.');
       }
 
-      const accessToken = data.accessToken
-      console.log('Facebook access token:', accessToken)
-
-      // Send accessToken to your backend for verification / to create a session.
-      // Example: await loginWithFacebook({ accessToken })
-
-      router.push('/(tabs)/Explore')
-    } catch (e) {
-      console.error('Facebook login error', e)
-      alert('Facebook login failed')
+    } catch (e: any) {
+      console.error('Facebook login error (fbsdk-next):', e);
+      alert('Đăng nhập Facebook thất bại: ' + e.message);
     }
   }
 
@@ -234,7 +237,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={styles.socialButton}
               activeOpacity={0.7}
-              onPress={() => handleSocialLogin("Apple")}
+            // onPress={() => handleSocialLogin("Apple")}
             >
               <MaterialCommunityIcons name="apple" size={24} color="#000000" />
             </TouchableOpacity>

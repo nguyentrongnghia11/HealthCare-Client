@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import * as React from "react";
 
 type OtpData = {
   username?: string;
@@ -13,11 +13,11 @@ type OtpContextType = {
 };
 
 // Tạo context
-const OtpContext = createContext<OtpContextType | undefined>(undefined);
+const OtpContext = React.createContext<OtpContextType | undefined>(undefined);
 
 // Provider component
-export default function OtpProvider  ({ children }: { children: ReactNode }) {
-  const [otpData, setOtpData] = useState<OtpData>({});
+export default function OtpProvider  ({ children }: { children: React.ReactNode }) {
+  const [otpData, setOtpData] = React.useState<OtpData>({});
   return (
     <OtpContext.Provider value={{ otpData, setOtpData }}>
       {children}
@@ -27,7 +27,7 @@ export default function OtpProvider  ({ children }: { children: ReactNode }) {
 
 // Hook tiện lợi để dùng context
 export const useOtp = () => {
-  const context = useContext(OtpContext);
+  const context = React.useContext(OtpContext);
   if (!context) throw new Error("useOtp must be used within OtpProvider");
   return context;
 };
