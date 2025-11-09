@@ -3,25 +3,20 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin'
 import { router } from "expo-router"
+import * as WebBrowser from 'expo-web-browser'
 import { useEffect, useState } from "react"
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View
 } from "react-native"
-import { Checkbox, Text, TextInput } from "react-native-paper"
-import { login, loginGoogle } from "../../api/auth/auth"
-
-// THAY THẾ bằng SDK NATIVE
 import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
-
-import * as WebBrowser from 'expo-web-browser'
-// import * as Facebook from 'expo-auth-session/providers/facebook' // ĐÃ XÓA
-// import { makeRedirectUri } from 'expo-auth-session' // ĐÃ XÓA
+import { Checkbox, Text, TextInput } from "react-native-paper"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { login, loginFacebook, loginGoogle } from "../../api/auth/auth"
 
 export default function LoginScreen() {
   const [identifier, setIdentifier] = useState("")
@@ -86,32 +81,26 @@ export default function LoginScreen() {
     }
   }
 
-  // ĐÃ XÓA: useAuthRequest cũ
-  // const [fbRequest, fbResponse, fbPromptAsync] = Facebook.useAuthRequest(...)
-
-  // ĐÃ XÓA: useEffect theo dõi fbResponse cũ
-
   const handleFacebookLogin = async () => {
     try {
-      // Bắt đầu quá trình đăng nhập bằng SDK native
       const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
 
       if (result.isCancelled) {
         console.log('Facebook login cancelled by user.');
         return;
       }
-
-      // Lấy Access Token sau khi đăng nhập thành công
       const data = await AccessToken.getCurrentAccessToken();
 
       if (data) {
-        const access_token = data.accessToken;
-        console.log('Facebook Access Token (fbsdk-next):', access_token);
-        
-        // --- BƯỚC XỬ LÝ TOKEN: Cần dùng access_token này để xác thực với Backend hoặc Firebase ---
-        
-        // Ví dụ: Đăng nhập thành công, chuyển hướng
-        router.push('/(tabs)/Explore');
+        const accessToken = data.accessToken;
+
+        const res = await loginFacebook(accessToken)
+
+        console.log("Day la res ", res)
+
+        if (res) router.push('/(tabs)/Explore');
+        else console.log("Dang nhap khong thanh cong")
+
       } else {
         alert('Không thể lấy Access Token.');
       }

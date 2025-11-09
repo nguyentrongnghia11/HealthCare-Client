@@ -118,5 +118,12 @@ export const loginGoogle = async (idToken: string) => {
     return res.data
 }
 
+export const loginFacebook = async (accessToken: string) => {
+
+    console.log ("day la token ", accessToken)
+    const res = await instance.post("/auth/facebook", {accessToken});
+    return res.data
+}
+
 
 
