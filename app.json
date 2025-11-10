@@ -15,7 +15,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Ứng dụng cần truy cập vị trí của bạn để theo dõi quãng đường chạy và tính toán calo tiêu thụ.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Ứng dụng cần theo dõi vị trí trong nền để tiếp tục tính toán khi bạn khóa màn hình."
+      }
     },
     "android": {
       "package": "com.heathcareapp",
@@ -46,7 +50,9 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
       ]
     },
     "web": {
@@ -68,7 +74,7 @@
         {
           "appId": "819974580826983",
           "appID": "819974580826983",
-          "clientToken": "73e4787e530a404f71ba0a295d61d88d", 
+          "clientToken": "73e4787e530a404f71ba0a295d61d88d",
           "displayName": "heath_care_cli",
           "scheme": "fb819974580826983"
         }

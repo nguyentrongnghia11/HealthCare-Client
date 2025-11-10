@@ -34,7 +34,16 @@ const ExploreScreen = () => {
   const handleCategoryPress = (item: { id: string; label: string }) => {
     console.log("Category clicked:", item.label);
     // 👉 Bạn có thể điều hướng sang màn hình khác, ví dụ:
-    router.push(`/(tabs)/Explore/nutrition`);
+
+    if (item.label === "Running") {
+      console.log(123)
+      router.push(`/(tabs)/Explore/step_stracker`);
+
+    }
+    else {
+
+      router.push(`/(tabs)/Explore/nutrition`);
+    }
   };
 
   return (
