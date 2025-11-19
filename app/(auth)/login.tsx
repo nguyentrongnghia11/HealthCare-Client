@@ -1,6 +1,7 @@
 "use client"
 
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin'
 import { router } from "expo-router"
 import * as WebBrowser from 'expo-web-browser'
@@ -31,6 +32,19 @@ export default function LoginScreen() {
       alert("Dang nhap khong thanh cong ");
     }
     else {
+      // try to persist token/user if server returned one
+      try {
+        const anyRes = res as any
+        const token = anyRes?.access_token ?? anyRes?.token ?? anyRes?.accessToken ?? anyRes?.data?.access_token ?? anyRes?.data?.token ?? anyRes?.data?.accessToken ?? anyRes?.jwt ?? anyRes?.data?.jwt
+        const refresh = anyRes?.refresh_token ?? anyRes?.data?.refresh_token
+        const userObj = anyRes?.user ?? anyRes?.data?.user ?? anyRes?.data ?? res
+        if (token) await AsyncStorage.setItem('token', token)
+        if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
+        await AsyncStorage.setItem('user', JSON.stringify(userObj))
+      } catch (e) {
+        console.warn('Failed to save auth info', e)
+      }
+
       router.push("/(tabs)/Explore")
     }
   }
@@ -59,6 +73,18 @@ export default function LoginScreen() {
       if (res !== null) {
 
         console.log('Google user:', userInfo)
+        // persist token/user
+        try {
+          const anyRes = res as any
+          const token = anyRes?.access_token ?? anyRes?.token ?? anyRes?.accessToken ?? anyRes?.data?.access_token ?? anyRes?.data?.token ?? anyRes?.data?.accessToken ?? anyRes?.jwt ?? anyRes?.data?.jwt
+          const refresh = anyRes?.refresh_token ?? anyRes?.data?.refresh_token
+          const userObj = anyRes?.user ?? anyRes?.data?.user ?? anyRes?.data ?? res
+          if (token) await AsyncStorage.setItem('token', token)
+          if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
+          await AsyncStorage.setItem('user', JSON.stringify(userObj))
+        } catch (e) {
+          console.warn('Failed to save google auth', e)
+        }
         router.push("/(tabs)/Overview")
       }
 
@@ -98,7 +124,20 @@ export default function LoginScreen() {
 
         console.log("Day la res ", res)
 
-        if (res) router.push('/(tabs)/Explore');
+        if (res) {
+          try {
+            const anyRes = res as any
+            const token = anyRes?.access_token ?? anyRes?.token ?? anyRes?.accessToken ?? anyRes?.data?.access_token ?? anyRes?.data?.token ?? anyRes?.data?.accessToken ?? anyRes?.jwt ?? anyRes?.data?.jwt
+            const refresh = anyRes?.refresh_token ?? anyRes?.data?.refresh_token
+            const userObj = anyRes?.user ?? anyRes?.data?.user ?? anyRes?.data ?? res
+            if (token) await AsyncStorage.setItem('token', token)
+            if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
+            await AsyncStorage.setItem('user', JSON.stringify(userObj))
+          } catch (e) {
+            console.warn('Failed to save facebook auth', e)
+          }
+          router.push('/(tabs)/Explore')
+        }
         else console.log("Dang nhap khong thanh cong")
 
       } else {

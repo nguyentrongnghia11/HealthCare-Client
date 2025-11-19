@@ -4,7 +4,7 @@ interface UploadResponse {
   data?: any; 
 }
 export const uploadImage = async (uri: string): Promise<UploadResponse> => {
-  const serverUrl = 'http://10.234.168.160:3000/nutrition/analyze'; 
+  const serverUrl = 'http://10.28.100.160:3000/nutrition/analyze'; 
 
   const formData = new FormData();
 
