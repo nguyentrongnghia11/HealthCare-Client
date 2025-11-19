@@ -1,10 +1,13 @@
 "use client"
 
 import { MaterialCommunityIcons } from "@expo/vector-icons"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Alert, Dimensions, ScrollView, StyleSheet, View } from "react-native"
 import { Button, IconButton, Text, useTheme } from "react-native-paper"
+import { getCalories } from '../../../api/nutrition'
 import { AddMealModal } from "../../../components/AddMealModalProps"
+import CalendarPicker from "../../../components/CalendarPicker"
+import MealListItem from "../../../components/MealListItem"
 import { NutritionStats } from "../../../components/NutritionStats"
 import { ProgressCircle } from "../../../components/ProgressCircle"
 
@@ -20,9 +23,33 @@ interface NutritionData {
     carbs: { value: number; percentage: number }
 }
 
+interface Meal {
+    id: string
+    name: string
+    time: string
+    calories: number
+    category: "breakfast" | "lunch" | "dinner" | "snack"
+}
+
+// Mock meals data
+const mockMeals: { [key: string]: Meal[] } = {
+    today: [
+        { id: "1", name: "Oatmeal with berries", time: "08:00 AM", calories: 350, category: "breakfast" },
+        { id: "2", name: "Grilled chicken salad", time: "12:30 PM", calories: 450, category: "lunch" },
+        { id: "3", name: "Apple with almond butter", time: "03:00 PM", calories: 160, category: "snack" },
+    ],
+}
+
 export default function NutritionScreen() {
     const theme = useTheme()
     const [showAddMealModal, setShowAddMealModal] = useState(false)
+    const [selectedDate, setSelectedDate] = useState(new Date())
+
+    const [loading, setLoading] = useState(false)
+    const [apiSummary, setApiSummary] = useState<any | null>(null)
+    const [apiUser, setApiUser] = useState<any | null>(null)
+    const [apiMeals, setApiMeals] = useState<Meal[]>([])
+    const [error, setError] = useState<string | null>(null)
 
     const [nutritionData, setNutritionData] = useState<NutritionData>({
         consumed: 0,
@@ -32,6 +59,17 @@ export default function NutritionScreen() {
         protein: { value: 0, percentage: 0 },
         carbs: { value: 0, percentage: 0 },
     })
+
+    const isToday = () => {
+        const today = new Date()
+        return (
+            selectedDate.getDate() === today.getDate() &&
+            selectedDate.getMonth() === today.getMonth() &&
+            selectedDate.getFullYear() === today.getFullYear()
+        )
+    }
+
+    const currentMeals = apiMeals.length > 0 ? apiMeals : (isToday() ? mockMeals.today : [])
 
     const handleAddMeal = (type: "photo" | "camera" | "manual") => {
         setShowAddMealModal(false)
@@ -49,6 +87,60 @@ export default function NutritionScreen() {
         }
     }
 
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            setError(null)
+            try {
+
+                console.log  ("249423sjdfshdf")
+                const dateStr = selectedDate.toISOString().split('T')[0]
+                const res = await getCalories(dateStr)
+
+                console.log ("API response: ", res)
+
+                setApiUser(res.user ?? null)
+                setApiSummary(res.summary ?? null)
+
+                const meals = (res.meals || []).map((m: any) => ({
+                    id: m._id || m.id || String(Math.random()),
+                    name: m.foodName || m.name || 'Unknown',
+                    time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+                    calories: m.calories || 0,
+                    category: 'lunch' as const,
+                }))
+                setApiMeals(meals)
+
+                // compute macro totals from meals
+                const totalProtein = (res.meals || []).reduce((s: number, it: any) => s + (it.protein || 0), 0)
+                const totalCarbs = (res.meals || []).reduce((s: number, it: any) => s + (it.carbs || 0), 0)
+                const totalFat = (res.meals || []).reduce((s: number, it: any) => s + (it.fat || 0), 0)
+
+                const goal = res.user?.goal ?? nutritionData.total
+                const consumed = res.summary?.consumed ?? 0
+
+                const proteinPct = res.user?.macroGoals?.protein ? Math.round((totalProtein * 100) / res.user.macroGoals.protein) : 0
+                const carbsPct = res.user?.macroGoals?.carb ? Math.round((totalCarbs * 100) / res.user.macroGoals.carb) : 0
+                const fatPct = res.user?.macroGoals?.fat ? Math.round((totalFat * 100) / res.user.macroGoals.fat) : 0
+
+                setNutritionData({
+                    consumed,
+                    total: goal,
+                    percentage: goal ? Math.round((consumed * 100) / goal) : 0,
+                    fat: { value: totalFat, percentage: fatPct },
+                    protein: { value: totalProtein, percentage: proteinPct },
+                    carbs: { value: totalCarbs, percentage: carbsPct },
+                })
+            } catch (e: any) {
+                setError(e.message ?? String(e))
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchData()
+    }, [selectedDate])
+
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             {/* Header */}
@@ -65,21 +157,19 @@ export default function NutritionScreen() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Title */}
+                <CalendarPicker selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+
                 <View style={styles.titleSection}>
-                    <Text variant="bodyLarge" style={styles.subtitle}>
-                        You have
-                    </Text>
                     <View style={styles.consumedContainer}>
-                        <Text variant="headlineLarge" style={styles.consumed}>
-                            consumed{" "}
+                        <Text variant="headlineLarge" style= {{fontWeight: "700"}}>
+                            Consumed{" "}
                         </Text>
-                        <Text variant="headlineLarge" style={[styles.consumed, styles.caloriesHighlight]}>
+                        <Text variant="headlineLarge" style={styles.caloriesHighlight}>
                             {nutritionData.consumed} kcal
                         </Text>
                     </View>
                     <Text variant="bodyLarge" style={styles.subtitle}>
-                        today
+                        {isToday() ? "today" : "on this day"}
                     </Text>
                 </View>
 
@@ -119,6 +209,31 @@ export default function NutritionScreen() {
                         percentage={nutritionData.carbs.percentage}
                         color="#00BDD4"
                     />
+                </View>
+
+                <View style={styles.mealsSection}>
+                    <Text variant="titleMedium" style={styles.mealsSectionTitle}>
+                        Meals Today
+                    </Text>
+                    {currentMeals.length > 0 ? (
+                        <View style={styles.mealsList}>
+                            {currentMeals.map((meal) => (
+                                <MealListItem
+                                    key={meal.id}
+                                    id={meal.id}
+                                    name={meal.name}
+                                    time={meal.time}
+                                    calories={meal.calories}
+                                    category={meal.category}
+                                />
+                            ))}
+                        </View>
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <MaterialCommunityIcons name={"plate-empty" as any} size={48} color="#CCC" />
+                            <Text style={styles.emptyStateText}>No meals logged for this day</Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Spacer */}
@@ -195,9 +310,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         marginVertical: 8,
     },
-    consumed: {
-        fontWeight: "600",
-    },
+
     caloriesHighlight: {
         color: "#00BDD4",
     },
@@ -209,6 +322,31 @@ const styles = StyleSheet.create({
     statsContainer: {
         gap: 16,
         marginTop: 32,
+    },
+    mealsSection: {
+        marginTop: 40,
+        marginBottom: 20,
+    },
+    mealsSectionTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#333",
+        marginBottom: 12,
+    },
+    mealsList: {
+        gap: 0,
+    },
+    emptyState: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 32,
+        backgroundColor: "#F9F9F9",
+        borderRadius: 12,
+    },
+    emptyStateText: {
+        fontSize: 14,
+        color: "#999",
+        marginTop: 8,
     },
     spacer2: {
         height: 24,
