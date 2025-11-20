@@ -18,6 +18,7 @@ import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import { Checkbox, Text, TextInput } from "react-native-paper"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { login, loginFacebook, loginGoogle } from "../../api/auth/auth"
+import { getUserDetail } from "../../api/user"
 
 export default function LoginScreen() {
   const [identifier, setIdentifier] = useState("")
@@ -41,11 +42,20 @@ export default function LoginScreen() {
         if (token) await AsyncStorage.setItem('token', token)
         if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
         await AsyncStorage.setItem('user', JSON.stringify(userObj))
+        
+        // Check if user has completed profile
+        const userDetail = await getUserDetail()
+        if (userDetail === null) {
+          // User hasn't completed onboarding, redirect to welcome
+          router.replace("/(onboarding)/welcome")
+        } else {
+          // User has complete profile, go to main app
+          router.replace("/(tabs)/Explore")
+        }
       } catch (e) {
-        console.warn('Failed to save auth info', e)
+        console.warn('Failed to save auth info or check user detail', e)
+        router.replace("/(tabs)/Explore")
       }
-
-      router.push("/(tabs)/Explore")
     }
   }
 
@@ -82,10 +92,18 @@ export default function LoginScreen() {
           if (token) await AsyncStorage.setItem('token', token)
           if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
           await AsyncStorage.setItem('user', JSON.stringify(userObj))
+          
+          // Check if user has completed profile
+          const userDetail = await getUserDetail()
+          if (userDetail === null) {
+            router.replace("/(onboarding)/welcome")
+          } else {
+            router.replace("/(tabs)/Explore")
+          }
         } catch (e) {
-          console.warn('Failed to save google auth', e)
+          console.warn('Failed to save google auth or check user detail', e)
+          router.replace("/(tabs)/Explore")
         }
-        router.push("/(tabs)/Overview")
       }
 
       else {
@@ -133,10 +151,18 @@ export default function LoginScreen() {
             if (token) await AsyncStorage.setItem('token', token)
             if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
             await AsyncStorage.setItem('user', JSON.stringify(userObj))
+            
+            // Check if user has completed profile
+            const userDetail = await getUserDetail()
+            if (userDetail === null) {
+              router.replace("/(onboarding)/welcome")
+            } else {
+              router.replace("/(tabs)/Explore")
+            }
           } catch (e) {
-            console.warn('Failed to save facebook auth', e)
+            console.warn('Failed to save facebook auth or check user detail', e)
+            router.replace('/(tabs)/Explore')
           }
-          router.push('/(tabs)/Explore')
         }
         else console.log("Dang nhap khong thanh cong")
 

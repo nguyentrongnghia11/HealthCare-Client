@@ -1,6 +1,7 @@
 "use client"
 
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { router } from "expo-router"
 import { useEffect, useRef, useState } from "react"
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
@@ -50,9 +51,26 @@ export default function OTPScreen({ navigation, route }: any) {
         }
 
         const rs = await verifyRegister({ ...otpData, otpCode })
-        if (!rs) { alert("Dang ki khong thanh cong") }
+        if (!rs) { 
+            alert("Dang ki khong thanh cong") 
+        }
         else {
-            router.push('/Overview')
+            // Save token and user info after successful registration
+            try {
+                const anyRes = rs as any
+                const token = anyRes?.access_token ?? anyRes?.token ?? anyRes?.accessToken ?? anyRes?.data?.access_token ?? anyRes?.data?.token ?? anyRes?.data?.accessToken ?? anyRes?.jwt ?? anyRes?.data?.jwt
+                const refresh = anyRes?.refresh_token ?? anyRes?.data?.refresh_token
+                const userObj = anyRes?.user ?? anyRes?.data?.user ?? anyRes?.data ?? rs
+                if (token) await AsyncStorage.setItem('token', token)
+                if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
+                await AsyncStorage.setItem('user', JSON.stringify(userObj))
+                
+                // New user should go to onboarding
+                router.replace('/(onboarding)/welcome')
+            } catch (e) {
+                console.warn('Failed to save auth info after registration', e)
+                router.replace('/(onboarding)/welcome')
+            }
         }
 
     }

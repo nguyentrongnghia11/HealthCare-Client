@@ -1,19 +1,24 @@
 "use client"
 
 import { MaterialCommunityIcons } from "@expo/vector-icons"
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin'
 import { router } from "expo-router"
-import { useState } from "react"
+import * as WebBrowser from 'expo-web-browser'
+import { useEffect, useState } from "react"
 import {
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from "react-native"
+import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import { Text, TextInput } from "react-native-paper"
-import { register } from "../../api/auth/auth"
+import { loginFacebook, loginGoogle, register } from "../../api/auth/auth"
+import { getUserDetail } from "../../api/user"
 import { useOtp } from "../OtpContext"
 
 
@@ -25,6 +30,14 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const { setOtpData } = useOtp();
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '103191199587-vgn4vvs8id2slu1hdtka99feb3tunsek.apps.googleusercontent.com',
+      offlineAccess: true,
+    })
+    WebBrowser.maybeCompleteAuthSession();
+  }, [])
 
 
   const handleRegister = async () => {
@@ -41,6 +54,103 @@ export default function RegisterScreen() {
         otpCode: "xxx",
       });
       router.push("/(auth)/otp");
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
+
+      try {
+        await GoogleSignin.signOut()
+      } catch (e) {
+        console.debug('Google signOut (ignored) error', e)
+      }
+
+      const userInfo: any = await GoogleSignin.signIn()
+      const res = await loginGoogle(userInfo.data.idToken)
+
+      if (res !== null) {
+        console.log('Google user:', userInfo)
+        try {
+          const anyRes = res as any
+          const token = anyRes?.access_token ?? anyRes?.token ?? anyRes?.accessToken ?? anyRes?.data?.access_token ?? anyRes?.data?.token ?? anyRes?.data?.accessToken ?? anyRes?.jwt ?? anyRes?.data?.jwt
+          const refresh = anyRes?.refresh_token ?? anyRes?.data?.refresh_token
+          const userObj = anyRes?.user ?? anyRes?.data?.user ?? anyRes?.data ?? res
+          if (token) await AsyncStorage.setItem('token', token)
+          if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
+          await AsyncStorage.setItem('user', JSON.stringify(userObj))
+          
+          const userDetail = await getUserDetail()
+          if (userDetail === null) {
+            router.replace("/(onboarding)/welcome")
+          } else {
+            router.replace("/(tabs)/Explore")
+          }
+        } catch (e) {
+          console.warn('Failed to save google auth or check user detail', e)
+          router.replace("/(tabs)/Explore")
+        }
+      } else {
+        console.log("Dang nhap khong thanh cong !")
+      }
+    } catch (error: any) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('User cancelled google sign in')
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Sign in in progress')
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        alert('Google Play Services not available or outdated')
+      } else {
+        console.error(error)
+        alert('Google sign-in error')
+      }
+    }
+  }
+
+  const handleFacebookLogin = async () => {
+    try {
+      const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+
+      if (result.isCancelled) {
+        console.log('Facebook login cancelled by user.');
+        return;
+      }
+      const data = await AccessToken.getCurrentAccessToken();
+
+      if (data) {
+        const accessToken = data.accessToken;
+        const res = await loginFacebook(accessToken)
+
+        if (res) {
+          try {
+            const anyRes = res as any
+            const token = anyRes?.access_token ?? anyRes?.token ?? anyRes?.accessToken ?? anyRes?.data?.access_token ?? anyRes?.data?.token ?? anyRes?.data?.accessToken ?? anyRes?.jwt ?? anyRes?.data?.jwt
+            const refresh = anyRes?.refresh_token ?? anyRes?.data?.refresh_token
+            const userObj = anyRes?.user ?? anyRes?.data?.user ?? anyRes?.data ?? res
+            if (token) await AsyncStorage.setItem('token', token)
+            if (refresh) await AsyncStorage.setItem('refreshToken', refresh)
+            await AsyncStorage.setItem('user', JSON.stringify(userObj))
+            
+            const userDetail = await getUserDetail()
+            if (userDetail === null) {
+              router.replace("/(onboarding)/welcome")
+            } else {
+              router.replace("/(tabs)/Explore")
+            }
+          } catch (e) {
+            console.warn('Failed to save facebook auth or check user detail', e)
+            router.replace('/(tabs)/Explore')
+          }
+        } else {
+          console.log("Dang nhap khong thanh cong")
+        }
+      } else {
+        alert('Không thể lấy Access Token.');
+      }
+    } catch (e: any) {
+      console.error('Facebook login error (fbsdk-next):', e);
+      alert('Đăng nhập Facebook thất bại: ' + e.message);
     }
   }
 
@@ -165,23 +275,16 @@ export default function RegisterScreen() {
             <TouchableOpacity
               style={styles.socialButton}
               activeOpacity={0.7}
-              onPress={() => handleSocialLogin("Google")}
+              onPress={handleGoogleSignIn}
             >
               <MaterialCommunityIcons name="google" size={24} color="#EA4335" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.socialButton}
               activeOpacity={0.7}
-              onPress={() => handleSocialLogin("Facebook")}
+              onPress={handleFacebookLogin}
             >
               <MaterialCommunityIcons name="facebook" size={24} color="#1877F2" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.socialButton}
-              activeOpacity={0.7}
-              onPress={() => handleSocialLogin("Apple")}
-            >
-              <MaterialCommunityIcons name="apple" size={24} color="#000000" />
             </TouchableOpacity>
           </View>
 

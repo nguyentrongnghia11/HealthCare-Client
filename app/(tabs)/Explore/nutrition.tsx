@@ -53,7 +53,7 @@ export default function NutritionScreen() {
 
     const [nutritionData, setNutritionData] = useState<NutritionData>({
         consumed: 0,
-        total: 2000,
+        total: 0,
         percentage: 0,
         fat: { value: 0, percentage: 0 },
         protein: { value: 0, percentage: 0 },
@@ -93,11 +93,11 @@ export default function NutritionScreen() {
             setError(null)
             try {
 
-                console.log  ("249423sjdfshdf")
+                console.log("249423sjdfshdf")
                 const dateStr = selectedDate.toISOString().split('T')[0]
                 const res = await getCalories(dateStr)
 
-                console.log ("API response: ", res)
+                console.log("API response: ", res)
 
                 setApiUser(res.user ?? null)
                 setApiSummary(res.summary ?? null)
@@ -117,6 +117,8 @@ export default function NutritionScreen() {
                 const totalFat = (res.meals || []).reduce((s: number, it: any) => s + (it.fat || 0), 0)
 
                 const goal = res.user?.goal ?? nutritionData.total
+
+                console.log("GOAL ", goal)
                 const consumed = res.summary?.consumed ?? 0
 
                 const proteinPct = res.user?.macroGoals?.protein ? Math.round((totalProtein * 100) / res.user.macroGoals.protein) : 0
@@ -161,7 +163,7 @@ export default function NutritionScreen() {
 
                 <View style={styles.titleSection}>
                     <View style={styles.consumedContainer}>
-                        <Text variant="headlineLarge" style= {{fontWeight: "700"}}>
+                        <Text variant="headlineLarge" style={{ fontWeight: "700" }}>
                             Consumed{" "}
                         </Text>
                         <Text variant="headlineLarge" style={styles.caloriesHighlight}>
@@ -181,7 +183,7 @@ export default function NutritionScreen() {
                         percentage={nutritionData.percentage}
                         protein={nutritionData.protein.percentage}
                         consumed={nutritionData.consumed}
-                        goal={2000}
+                        goal={nutritionData.total}
 
                     />
                 </View>
