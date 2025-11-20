@@ -1,110 +1,36 @@
 import instance from "../../utils/axiosInstance";
 
-
-
-
-interface UploadResponse {
-    message?: string;
-    data?: any;
-}
 export const register = async (formData: any) => {
-    const serverUrl = 'http://10.234.168.160:3000/otp';
-
     try {
-        const response: Response = await fetch(serverUrl, {
-            method: 'POST',
-            body: JSON.stringify(formData),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const responseData: UploadResponse = await response.json();
-
-        if (response.ok) {
-            return responseData;
-        } else {
-            throw new Error(responseData.message || 'Lỗi không xác định từ server');
-        }
-    } catch (error: unknown) {
-        let errorMessage = 'Đã xảy ra lỗi không xác định';
-
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-
-        console.error('Lỗi khi upload: ', errorMessage);
+        const response = await instance.post('/otp', formData);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định từ server';
+        console.error('Lỗi khi register: ', errorMessage);
         throw new Error(errorMessage);
     }
 }
 
 export const verifyRegister = async (formData: any) => {
-    console.log(formData)
-    const serverUrl = 'http://10.234.168.160:3000/user';
-
+    console.log(formData);
     try {
-        const response: Response = await fetch(serverUrl, {
-            method: 'POST',
-            body: JSON.stringify(formData),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const responseData: UploadResponse = await response.json();
-
-        if (response.ok) {
-            return responseData;
-        } else {
-            throw new Error(responseData.message || 'Lỗi không xác định từ server');
-        }
-    } catch (error: unknown) {
-        let errorMessage = 'Đã xảy ra lỗi không xác định';
-
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-
-        console.error('Lỗi khi upload: ', errorMessage);
+        const response = await instance.post('/user', formData);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định từ server';
+        console.error('Lỗi khi verify: ', errorMessage);
         throw new Error(errorMessage);
     }
 }
 
 export const login = async (formData: any) => {
-    const serverUrl = 'http://10.234.168.160:3000/auth/login';
-
-
-    //     {
-    //   "identifier": "trongnghia599",
-    //   "password": "trongnghia599"
-    // }
-
-    console.log("day la form data ", formData)
-
+    console.log("day la form data ", formData);
     try {
-        const response: Response = await fetch(serverUrl, {
-            method: 'POST',
-            body: JSON.stringify(formData),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const responseData: UploadResponse = await response.json();
-
-        if (response.ok) {
-            return responseData;
-        } else {
-            throw new Error(responseData.message || 'Lỗi không xác định từ server');
-        }
-    } catch (error: unknown) {
-        let errorMessage = 'Đã xảy ra lỗi không xác định';
-
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-
-        console.error('Lỗi khi upload: ', errorMessage);
+        const response = await instance.post('/auth/login', formData);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định từ server';
+        console.error('Lỗi khi login: ', errorMessage);
         throw new Error(errorMessage);
     }
 }
@@ -123,6 +49,17 @@ export const loginFacebook = async (accessToken: string) => {
     console.log ("day la token ", accessToken)
     const res = await instance.post("/auth/facebook", {accessToken});
     return res.data
+}
+
+export const logout = async () => {
+    try {
+        // Optional: Call backend logout endpoint if exists
+        // await instance.post('/auth/logout');
+        return true;
+    } catch (error) {
+        console.error('Logout error:', error);
+        return true; // Still logout locally even if backend call fails
+    }
 }
 
 

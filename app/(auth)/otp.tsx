@@ -50,9 +50,13 @@ export default function OTPScreen({ navigation, route }: any) {
         }
 
         const rs = await verifyRegister({ ...otpData, otpCode })
-        if (!rs) { alert("Dang ki khong thanh cong") }
+        if (!rs) { 
+            alert("Dang ki khong thanh cong") 
+        }
         else {
-            router.push('/Overview')
+            // After successful registration, redirect to login page
+            alert("Đăng ký thành công! Vui lòng đăng nhập.")
+            router.replace('/(auth)/login')
         }
 
     }

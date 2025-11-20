@@ -1,28 +1,13 @@
-import { useRouter } from "expo-router";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import account from "../../assets/images/overview/account.png";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 
 export default function Header() {
-  const router = useRouter();
-  
-  const handleTestLogout = () => {
-    router.push ('/login');
-  }
 
   return (
     <View style={styles.container}>
       <View style={styles.headerContent}>
         <TouchableOpacity style={styles.homeIcon} >
           <View style={styles.homeIconShape} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.profileContainer} onPress={handleTestLogout}>
-          <Image
-            source={account}
-            style={styles.profileImage}
-          />
-          <View style={styles.onlineIndicator} />
         </TouchableOpacity>
       </View>
     </View>

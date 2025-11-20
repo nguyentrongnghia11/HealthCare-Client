@@ -5,7 +5,7 @@ import React from "react"
 import { Alert, Animated, Dimensions, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
 import { Surface, Text } from "react-native-paper"
 
-import { uploadImage } from "../utils/handleImage"
+import { uploadImage } from "../api/nutrition"
 
 interface NutritionData {
   consumed: number
@@ -152,26 +152,27 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, 
     try {
       const responseData = await uploadImage(uri);
 
-      const dataRes = responseData.data
-      console.log('Upload thành công: ', dataRes);
+
+      console.log('Upload thành công: ', responseData);
 
       const { ...newNutritionData } = nutritionData
 
-      newNutritionData.carbs.value = Math.round(dataRes.total_nutrition.carbs_g + nutritionData.carbs.value);
+      newNutritionData.carbs.value = Math.round((responseData.carbs || 0) + nutritionData.carbs.value);
       newNutritionData.carbs.percentage = Math.round((newNutritionData.carbs.value * 100) / 225);
 
-      newNutritionData.protein.value = Math.round(dataRes.total_nutrition.protein_g + nutritionData.protein.value);
+      newNutritionData.protein.value = Math.round((responseData.protein || 0) + nutritionData.protein.value);
       newNutritionData.protein.percentage = Math.round((newNutritionData.protein.value * 100) / 150);
 
-      newNutritionData.fat.value = Math.round(dataRes.total_nutrition.fat_g + nutritionData.fat.value);
+      newNutritionData.fat.value = Math.round((responseData.fat || 0) + nutritionData.fat.value);
       newNutritionData.fat.percentage = Math.round((newNutritionData.fat.value * 100) / 55);
 
-      newNutritionData.consumed = Math.round(newNutritionData.consumed += dataRes.total_nutrition.calories);
+      newNutritionData.consumed = Math.round(newNutritionData.consumed += responseData.calories);
       newNutritionData.percentage = Math.round((newNutritionData.consumed * 100) / 2000);
 
-      console.log ("new nutrition " , newNutritionData)
+      console.log("new nutrition ", newNutritionData)
 
-      setNutritionData(newNutritionData)} catch (error) {
+      setNutritionData(newNutritionData)
+    } catch (error) {
       console.error('Lỗi khi upload: ', error);
       Alert.alert('Tải lên thất bại', 'Đã có lỗi xảy ra khi tải ảnh lên.');
     }
