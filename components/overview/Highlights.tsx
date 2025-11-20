@@ -46,6 +46,12 @@ export default function Highlights() {
     
     fetchRunningData()
   }, [])
+
+  const handlePress = (item: any) => {
+    if (item.title === "Sleep") {
+      router.push("/Overview/sleep")
+    }
+  }
   
   const highlightData = [
     {
@@ -98,11 +104,12 @@ export default function Highlights() {
 
       <View style={styles.grid}>
         {highlightData.map((item) => (
-          <TouchableOpacity key={item.id} style={[styles.card, { backgroundColor: item.backgroundColor }]}
-           onPress={() => {
-  if (item.link) router.push({ pathname: item.link as any });
-}}
->
+          <TouchableOpacity
+            key={item.id}
+            style={[styles.card, { backgroundColor: item.backgroundColor }]}
+            onPress={() => handlePress(item)}
+            activeOpacity={0.7}
+          >
             <View style={styles.cardHeader}>
               <Text style={styles.cardIcon}>{item.icon}</Text>
             </View>
