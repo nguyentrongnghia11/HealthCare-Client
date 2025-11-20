@@ -125,5 +125,16 @@ export const loginFacebook = async (accessToken: string) => {
     return res.data
 }
 
+export const logout = async () => {
+    try {
+        // Optional: Call backend logout endpoint if exists
+        // await instance.post('/auth/logout');
+        return true;
+    } catch (error) {
+        console.error('Logout error:', error);
+        return true; // Still logout locally even if backend call fails
+    }
+}
+
 
 

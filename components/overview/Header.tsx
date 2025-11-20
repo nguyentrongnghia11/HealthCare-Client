@@ -6,8 +6,8 @@ import account from "../../assets/images/overview/account.png";
 export default function Header() {
   const router = useRouter();
   
-  const handleTestLogout = () => {
-    router.push ('/login');
+  const handleProfilePress = () => {
+    router.push('/profile');
   }
 
   return (
@@ -17,7 +17,7 @@ export default function Header() {
           <View style={styles.homeIconShape} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.profileContainer} onPress={handleTestLogout}>
+        <TouchableOpacity style={styles.profileContainer} onPress={handleProfilePress}>
           <Image
             source={account}
             style={styles.profileImage}
