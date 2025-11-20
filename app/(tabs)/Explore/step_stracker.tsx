@@ -12,8 +12,9 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import { LineChart } from 'react-native-chart-kit';
 import Svg, { Circle } from "react-native-svg";
-import { getSuggestedActivity, getTodayRunningData, saveRunningSession } from "../../../api/running";
+import { getRunningStats, getSuggestedActivity, getTodayRunningData, saveRunningSession } from "../../../api/running";
 
 const { width } = Dimensions.get("window");
 
@@ -77,6 +78,8 @@ const ProgressCircle = ({
 
 export default function RunningScreen() {
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<'today' | 'weekly' | 'monthly'>('today');
+  const [chartData, setChartData] = useState<any>(null);
 
   // Today's total data (from previous sessions)
   const [todayTotalData, setTodayTotalData] = useState({
@@ -150,6 +153,109 @@ export default function RunningScreen() {
     
     loadTodayData();
   }, []);
+
+  // Fetch chart data based on selected tab
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        const today = new Date();
+        let startDate: string;
+        let endDate: string;
+        let groupBy: 'day' | 'week' = 'day';
+        
+        if (selectedTab === 'today') {
+          // Get today's sessions - we already have this in todayTotalData
+          // For today, we'll show sessions if available
+          const todayData = await getTodayRunningData();
+          if (todayData.sessions && todayData.sessions.length > 0) {
+            // Group sessions by hour for today view
+            const hourlyData: any = {};
+            todayData.sessions.forEach(session => {
+              const hour = new Date(session.createdAt || session.date).getHours();
+              const hourKey = `${hour}:00`;
+              if (!hourlyData[hourKey]) {
+                hourlyData[hourKey] = { distance: 0, calories: 0, duration: 0 };
+              }
+              hourlyData[hourKey].distance += session.distanceKm;
+              hourlyData[hourKey].calories += session.caloriesBurned;
+              hourlyData[hourKey].duration += session.timeSeconds;
+            });
+            
+            const labels = Object.keys(hourlyData).sort();
+            const distances = labels.map(label => hourlyData[label].distance);
+            
+            setChartData({
+              labels: labels.length > 0 ? labels : ['No data'],
+              datasets: [{ data: distances.length > 0 ? distances : [0] }],
+            });
+          } else {
+            setChartData({
+              labels: ['No data'],
+              datasets: [{ data: [0] }],
+            });
+          }
+        } else if (selectedTab === 'weekly') {
+          // Last 7 days
+          endDate = today.toISOString().split('T')[0];
+          const startDateObj = new Date(today);
+          startDateObj.setDate(startDateObj.getDate() - 6);
+          startDate = startDateObj.toISOString().split('T')[0];
+          groupBy = 'day';
+          
+          const stats = await getRunningStats(startDate, endDate, groupBy);
+          if (stats.stats && stats.stats.length > 0) {
+            const labels = stats.stats.map(s => {
+              const date = new Date(s.date);
+              return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+            });
+            const distances = stats.stats.map(s => s.totalDistanceKm || 0);
+            
+            setChartData({
+              labels,
+              datasets: [{ data: distances }],
+            });
+          } else {
+            setChartData({
+              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              datasets: [{ data: [0, 0, 0, 0, 0, 0, 0] }],
+            });
+          }
+        } else if (selectedTab === 'monthly') {
+          // Last 4 weeks
+          endDate = today.toISOString().split('T')[0];
+          const startDateObj = new Date(today);
+          startDateObj.setDate(startDateObj.getDate() - 27); // 4 weeks
+          startDate = startDateObj.toISOString().split('T')[0];
+          groupBy = 'week';
+          
+          const stats = await getRunningStats(startDate, endDate, groupBy);
+          if (stats.stats && stats.stats.length > 0) {
+            const labels = stats.stats.map((s, i) => `W${i + 1}`);
+            const distances = stats.stats.map(s => s.totalDistanceKm || 0);
+            
+            setChartData({
+              labels,
+              datasets: [{ data: distances }],
+            });
+          } else {
+            setChartData({
+              labels: ['W1', 'W2', 'W3', 'W4'],
+              datasets: [{ data: [0, 0, 0, 0] }],
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch chart data:', error);
+        // Set default empty chart
+        setChartData({
+          labels: ['No data'],
+          datasets: [{ data: [0] }],
+        });
+      }
+    };
+    
+    fetchChartData();
+  }, [selectedTab]);
 
   // Auto-reset when new day starts
   useEffect(() => {
@@ -417,14 +523,72 @@ export default function RunningScreen() {
         {/* Chart card */}
         <View style={styles.chartCard}>
           <View style={styles.toggleWrap}>
-            <TouchableOpacity style={styles.tabActive}><Text style={styles.tabActiveText}>Today</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Weekly</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.tab}><Text style={styles.tabText}>Monthly</Text></TouchableOpacity>
+            <TouchableOpacity 
+              style={selectedTab === 'today' ? styles.tabActive : styles.tab}
+              onPress={() => setSelectedTab('today')}
+            >
+              <Text style={selectedTab === 'today' ? styles.tabActiveText : styles.tabText}>Today</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={selectedTab === 'weekly' ? styles.tabActive : styles.tab}
+              onPress={() => setSelectedTab('weekly')}
+            >
+              <Text style={selectedTab === 'weekly' ? styles.tabActiveText : styles.tabText}>Weekly</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={selectedTab === 'monthly' ? styles.tabActive : styles.tab}
+              onPress={() => setSelectedTab('monthly')}
+            >
+              <Text style={selectedTab === 'monthly' ? styles.tabActiveText : styles.tabText}>Monthly</Text>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.chartPlaceholder}>
-            <Text style={{ color: "#fff" }}>Chart placeholder</Text>
-          </View>
+          {chartData && (
+            <View style={styles.chartWrapper}>
+              <LineChart
+                data={chartData}
+                width={width - 60}
+                height={160}
+                yAxisLabel=""
+                yAxisSuffix=" km"
+                chartConfig={{
+                  backgroundColor: '#00D2E6',
+                  backgroundGradientFrom: '#00D2E6',
+                  backgroundGradientTo: '#00B8CC',
+                  decimalPlaces: 1,
+                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                  style: {
+                    borderRadius: 10,
+                  },
+                  propsForLabels: {
+                    fontSize: 13,
+                    fontWeight: 'bold',
+                  },
+                  propsForBackgroundLines: {
+                    strokeDasharray: '',
+                    stroke: 'rgba(255, 255, 255, 0.2)',
+                    strokeWidth: 1,
+                  },
+                  propsForDots: {
+                    r: '4',
+                    strokeWidth: '2',
+                    stroke: '#fff',
+                  },
+                }}
+                bezier
+                style={{
+                  marginTop: 12,
+                  borderRadius: 10,
+                }}
+                withInnerLines={true}
+                withOuterLines={false}
+                withVerticalLines={true}
+                withHorizontalLines={true}
+                segments={4}
+              />
+            </View>
+          )}
         </View>
 
         {/* Vùng đệm để nội dung cuộn không bị nút cố định che khuất */}
@@ -473,7 +637,7 @@ const styles = StyleSheet.create({
   tabActiveText: { color: "#00D2E6", fontWeight: "700" },
   tab: { paddingVertical: 6, paddingHorizontal: 16, justifyContent: "center", alignItems: "center" },
   tabText: { color: "#fff", fontWeight: "600" },
-  chartPlaceholder: { height: 150, marginTop: 12, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.08)", justifyContent: "center", alignItems: "center" },
+  chartWrapper: { marginTop: 8, alignItems: 'center' },
 
   // FIX: Style CỐ ĐỊNH Áp dụng cho TouchableOpacity
   fixedStartBtn: {

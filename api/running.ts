@@ -74,8 +74,40 @@ export const getTodayRunningData = async (date?: string): Promise<TodayRunningDa
   return res.data as TodayRunningDataResponse;
 }
 
+/**
+ * Get running statistics for a date range
+ * GET /running/me/stats?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&groupBy=day|week
+ */
+export interface RunningStatsResponse {
+  stats: Array<{
+    date: string; // YYYY-MM-DD or week identifier
+    totalDistanceKm: number;
+    totalCalories: number;
+    totalDurationSec: number;
+    sessionCount: number;
+  }>;
+  summary: {
+    totalDistanceKm: number;
+    totalCalories: number;
+    totalDurationSec: number;
+    totalSessions: number;
+  };
+}
+
+export const getRunningStats = async (startDate: string, endDate: string, groupBy: 'day' | 'week' = 'day'): Promise<RunningStatsResponse> => {
+  const params = {
+    startDate,
+    endDate,
+    groupBy,
+  };
+
+  const res = await instance.get('/running/me/stats', { params });
+  return res.data as RunningStatsResponse;
+}
+
 export default {
   getSuggestedActivity,
   saveRunningSession,
   getTodayRunningData,
+  getRunningStats,
 }

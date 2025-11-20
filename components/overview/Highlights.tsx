@@ -1,15 +1,61 @@
 import { useRouter } from "expo-router"
+import { useEffect, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { getCalories } from "../../api/nutrition"
+import { getTodayRunningData } from "../../api/running"
+
 export default function Highlights() {
-   const router = useRouter()
+  const router = useRouter()
+  
+  // State for dynamic data
+  const [nutritionCalories, setNutritionCalories] = useState(0)
+  const [runningKm, setRunningKm] = useState(0)
+  
+  // Fetch nutrition data
+  useEffect(() => {
+    const fetchNutritionData = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+        const data = await getCalories(today)
+        
+        // Calculate total calories from meals
+        const totalCals = data.meals?.reduce((sum, meal) => {
+          return sum + (meal.calories || 0)
+        }, 0) || 0
+        
+        setNutritionCalories(Math.round(totalCals))
+      } catch (error) {
+        console.error('Failed to fetch nutrition data:', error)
+      }
+    }
+    
+    fetchNutritionData()
+  }, [])
+  
+  // Fetch running data
+  useEffect(() => {
+    const fetchRunningData = async () => {
+      try {
+        const data = await getTodayRunningData()
+        const totalKm = data.summary?.totalDistanceKm || 0
+        setRunningKm(totalKm)
+      } catch (error) {
+        console.error('Failed to fetch running data:', error)
+      }
+    }
+    
+    fetchRunningData()
+  }, [])
+  
   const highlightData = [
     {
       id: 1,
       title: "Steps",
-      value: "11,857",
-      subtitle: "updated 15 min ago",
+      value: runningKm.toFixed(2),
+      subtitle: "km today",
       backgroundColor: "#00BFFF",
       icon: "🏃‍♂️",
+      link: "/(tabs)/Explore/step_stracker",
     },
     {
       id: 2,
@@ -19,7 +65,7 @@ export default function Highlights() {
       updateText: "updated 30m ago",
       backgroundColor: "#FF6B6B",
       icon: "📅",
-      link: "/(tabs)/Overview/cycletracking" ,
+      link: "/(tabs)/Overview/cycletracking",
     },
     {
       id: 3,
@@ -32,11 +78,12 @@ export default function Highlights() {
     {
       id: 4,
       title: "Nutrition",
-      value: "960",
-      subtitle: "kcal",
-      updateText: "updated 5 min ago",
+      value: nutritionCalories.toString(),
+      subtitle: "kcal consumed",
+      updateText: "today",
       backgroundColor: "#FF8C00",
       icon: "🥤",
+      link: "/(tabs)/Explore/nutrition",
     },
   ]
 

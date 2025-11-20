@@ -5,6 +5,7 @@ type OtpData = {
   email?: string;
   password?: string;
   otpCode?: string;
+  type?: string
 };
 
 type OtpContextType = {

@@ -7,13 +7,13 @@ import { router } from "expo-router"
 import * as WebBrowser from 'expo-web-browser'
 import { useEffect, useState } from "react"
 import {
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from "react-native"
 import { AccessToken, LoginManager } from 'react-native-fbsdk-next'
 import { Text, TextInput } from "react-native-paper"
@@ -41,7 +41,9 @@ export default function RegisterScreen() {
 
 
   const handleRegister = async () => {
-    const res = await register({ username: "xxx", email, password, otpCode: "xxx" })
+    console.log ("Registering with email:", email, "and password:", password)
+
+    const res = await register({ username: "xxx", email, password, otpCode: "xxx", type: "local" })
 
     if (!res) {
       alert("OTP send fail")
@@ -52,6 +54,7 @@ export default function RegisterScreen() {
         email: email,
         password: password,
         otpCode: "xxx",
+        type: "local"
       });
       router.push("/(auth)/otp");
     }

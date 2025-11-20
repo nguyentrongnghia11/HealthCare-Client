@@ -95,7 +95,17 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Sharing"
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="share" color={color} />,
+          tabBarLabel: 'Sharing',
+          tabBarIcon: ({ color }) => <TabBarIcon name="share-alt" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="Profile"
+        options={{
+          title: 'Profile',
+          tabBarLabel: 'Profile',
+          href: '/Profile',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />
     </Tabs>
