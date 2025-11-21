@@ -58,7 +58,25 @@ export const getCalories = async (date?: string): Promise<CaloriesResponse> => {
     return res.data as CaloriesResponse
 }
 
+export interface ManualMealData {
+    foodName: string
+    calories: number
+    protein: number
+    carbs: number
+    fat: number
+}
+
+export const addManualMeal = async (data: ManualMealData) => {
+    console.log('Adding manual meal:', data)
+    
+    const res = await instance.post('/nutrition/me/manual', data)
+    
+    console.log('Manual meal added successfully:', res.data)
+    return res.data
+}
+
 export default {
     getCalories,
+    addManualMeal,
 }
 

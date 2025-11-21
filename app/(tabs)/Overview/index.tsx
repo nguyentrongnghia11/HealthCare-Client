@@ -1,35 +1,36 @@
-import { ScrollView, StyleSheet, StatusBar } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { ScrollView, StatusBar, StyleSheet, View } from "react-native"
 
-import Header from "../../../components/overview/Header"
-import Overview from "../../../components/overview/Overview"
-import Highlights from "../../../components/overview/Highlights"
-import ThisWeekReport from "../../../components/overview/ThisWeekReport"
 import Blogs from "../../../components/overview/Blogs"
+import Highlights from "../../../components/overview/Highlights"
+import Overview from "../../../components/overview/Overview"
+import ThisWeekReport from "../../../components/overview/ThisWeekReport"
+import { Colors, useTheme } from "../../../contexts/ThemeContext"
 
 const App = () => {
+  const { isDark } = useTheme()
+  const colors = isDark ? Colors.dark : Colors.light
+  
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <Header />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={colors.background} />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Overview />
         <Highlights />
         <ThisWeekReport />
         <Blogs />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+     paddingHorizontal: 20,
   },
 })
 

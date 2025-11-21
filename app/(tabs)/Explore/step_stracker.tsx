@@ -76,6 +76,19 @@ const ProgressCircle = ({
   longitude: number;
 }
 
+// Calculate distance between two GPS coordinates using Haversine formula
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
+
 export default function RunningScreen() {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<'today' | 'weekly' | 'monthly'>('today');
@@ -318,14 +331,16 @@ export default function RunningScreen() {
 
             if (lastLocationRef.current) {
               const prev = lastLocationRef.current;
-              const dx = latitude - prev.latitude;
-              const dy = longitude - prev.longitude;
-              // approx meters (very rough) — thay bằng hàm calculateDistance nếu có
-              const meters = Math.sqrt(dx * dx + dy * dy) * 111000;
-              const km = meters / 1000;
+              // Use Haversine formula for accurate GPS distance
+              const km = calculateDistance(
+                prev.latitude,
+                prev.longitude,
+                latitude,
+                longitude
+              );
               const rate = targets.calorieRate;
 
-              console.log (parseFloat((km).toFixed(2)))
+              console.log('Distance calculated (km):', km);
 
               setCurrentSessionData((prev) => {
                 const newDistance = parseFloat((prev.distanceKm + km).toFixed(2));

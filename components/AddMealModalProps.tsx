@@ -1,11 +1,12 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 import { BlurView } from "expo-blur"
 import * as ImagePicker from 'expo-image-picker'
-import React from "react"
+import React, { useState } from "react"
 import { Alert, Animated, Dimensions, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native"
 import { Surface, Text } from "react-native-paper"
 
 import { uploadImage } from "../api/nutrition"
+import { ManualEntryModal } from "./ManualEntryModal"
 
 interface NutritionData {
   consumed: number
@@ -20,7 +21,10 @@ interface AddMealModalProps {
   visible: boolean
   onDismiss: () => void,
   nutritionData: NutritionData,
-  setNutritionData: any
+  setNutritionData: any,
+  onSuccess?: () => void
+  isUploading?: boolean
+  setIsUploading?: (value: boolean) => void
 }
 
 type IconName = "image-plus" | "camera" | "pencil"
@@ -69,8 +73,17 @@ const menuOptions: MenuOption[] = [
   },
 ]
 
-export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, nutritionData, setNutritionData }) => {
+export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, nutritionData, setNutritionData, onSuccess, isUploading: externalIsUploading, setIsUploading: externalSetIsUploading }) => {
   const [slideAnim] = React.useState(new Animated.Value(0))
+  const [showManualEntry, setShowManualEntry] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const actualSetIsUploading = (value: boolean) => {
+    setIsUploading(value);
+    if (externalSetIsUploading) {
+      externalSetIsUploading(value);
+    }
+  };
 
   React.useEffect(() => {
     if (visible) {
@@ -148,7 +161,7 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, 
   };
 
   const handleUpload = async (uri: string) => {
-    Alert.alert('Đang tải lên', 'Vui lòng chờ trong khi ảnh của bạn được tải lên...');
+    actualSetIsUploading(true);
     try {
       const responseData = await uploadImage(uri);
 
@@ -172,9 +185,15 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, 
       console.log("new nutrition ", newNutritionData)
 
       setNutritionData(newNutritionData)
+      Alert.alert('Thành công', 'Đã thêm món ăn thành công!');
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Lỗi khi upload: ', error);
       Alert.alert('Tải lên thất bại', 'Đã có lỗi xảy ra khi tải ảnh lên.');
+    } finally {
+      actualSetIsUploading(false);
     }
   };
 
@@ -185,78 +204,92 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, 
       handleChoosePhoto();
     } else if (optionId === 'manual') {
       onDismiss();
-      console.log('Mở màn hình nhập thủ công...');
+      setTimeout(() => {
+        setShowManualEntry(true);
+      }, 300);
     }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onDismiss}>
-      <BlurView intensity={95} style={styles.blurContainer}>
-        <TouchableOpacity activeOpacity={1} style={styles.backdrop} onPress={onDismiss}>
-          <Animated.View
-            style={[
-              styles.modalContainer,
-              {
-                transform: [{ translateY }],
-              },
-            ]}
-          >
-            <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-              <Surface style={styles.surface} elevation={0}>
-                {/* Handle Bar */}
-                <View style={styles.handleBar} />
+    <>
+      <Modal visible={visible} transparent animationType="none" onRequestClose={onDismiss}>
+        <BlurView intensity={95} style={styles.blurContainer}>
+          <TouchableOpacity activeOpacity={1} style={styles.backdrop} onPress={onDismiss}>
+            <Animated.View
+              style={[
+                styles.modalContainer,
+                {
+                  transform: [{ translateY }],
+                },
+              ]}
+            >
+              <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                <Surface style={styles.surface} elevation={0}>
+                  {/* Handle Bar */}
+                  <View style={styles.handleBar} />
 
-                {/* Header */}
-                <View style={styles.header}>
-                  <View>
-                    <Text style={styles.headerTitle}>Add Your Meal</Text>
-                    <Text style={styles.headerSubtitle}>Choose how you want to add</Text>
-                  </View>
-                  <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-                    <MaterialCommunityIcons name="close" size={24} color="#999" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Options */}
-                <ScrollView contentContainerStyle={styles.optionsContainer} showsVerticalScrollIndicator={false}>
-                  {menuOptions.map((option, index) => (
-                    <TouchableOpacity
-                      key={option.id}
-                      onPress={() => handleOptionPress(option.id)} // <-- Sửa từ onDismiss()
-                      activeOpacity={0.7}
-                      style={{ marginBottom: index === menuOptions.length - 1 ? 0 : 12 }}
-                    >
-                      <Surface style={styles.optionCard} elevation={0}>
-                        <View style={[styles.optionIcon, { backgroundColor: option.bgColor }]}>
-                          <MaterialCommunityIcons name={option.icon} size={32} color={option.color} />
-                        </View>
-
-                        {/* Middle: Text */}
-                        <View style={styles.optionText}>
-                          <Text style={styles.optionTitle}>{option.title}</Text>
-                          <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
-                        </View>
-
-                        {/* Right: Arrow */}
-                        <View style={[styles.arrow, { backgroundColor: option.bgColor }]}>
-                          <MaterialCommunityIcons name="arrow-right" size={20} color={option.color} />
-                        </View>
-                      </Surface>
+                  {/* Header */}
+                  <View style={styles.header}>
+                    <View>
+                      <Text style={styles.headerTitle}>Add Your Meal</Text>
+                      <Text style={styles.headerSubtitle}>Choose how you want to add</Text>
+                    </View>
+                    <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
+                      <MaterialCommunityIcons name="close" size={24} color="#999" />
                     </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                  </View>
 
-                {/* Footer Note */}
-                <View style={styles.footer}>
-                  <MaterialCommunityIcons name="information-outline" size={16} color="#999" />
-                  <Text style={styles.footerText}>Track meals daily to reach your nutrition goals</Text>
-                </View>
-              </Surface>
-            </TouchableOpacity>
-          </Animated.View>
-        </TouchableOpacity>
-      </BlurView>
-    </Modal>
+                  {/* Options */}
+                  <ScrollView contentContainerStyle={styles.optionsContainer} showsVerticalScrollIndicator={false}>
+                    {menuOptions.map((option, index) => (
+                      <TouchableOpacity
+                        key={option.id}
+                        onPress={() => handleOptionPress(option.id)}
+                        activeOpacity={0.7}
+                        style={{ marginBottom: index === menuOptions.length - 1 ? 0 : 12 }}
+                      >
+                        <Surface style={styles.optionCard} elevation={0}>
+                          <View style={[styles.optionIcon, { backgroundColor: option.bgColor }]}>
+                            <MaterialCommunityIcons name={option.icon} size={32} color={option.color} />
+                          </View>
+
+                          {/* Middle: Text */}
+                          <View style={styles.optionText}>
+                            <Text style={styles.optionTitle}>{option.title}</Text>
+                            <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
+                          </View>
+
+                          {/* Right: Arrow */}
+                          <View style={[styles.arrow, { backgroundColor: option.bgColor }]}>
+                            <MaterialCommunityIcons name="arrow-right" size={20} color={option.color} />
+                          </View>
+                        </Surface>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+
+                  {/* Footer Note */}
+                  <View style={styles.footer}>
+                    <MaterialCommunityIcons name="information-outline" size={16} color="#999" />
+                    <Text style={styles.footerText}>Track meals daily to reach your nutrition goals</Text>
+                  </View>
+                </Surface>
+              </TouchableOpacity>
+            </Animated.View>
+          </TouchableOpacity>
+        </BlurView>
+      </Modal>
+
+      {/* Manual Entry Modal */}
+      <ManualEntryModal
+        visible={showManualEntry}
+        onDismiss={() => setShowManualEntry(false)}
+        onSuccess={() => {
+          setShowManualEntry(false)
+          onSuccess?.()
+        }}
+      />
+    </>
   )
 }
 

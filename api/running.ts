@@ -45,10 +45,6 @@ export const getSuggestedActivity = async () => {
   return res.data as SuggestedActivityResponse;
 }
 
-/**
- * Save running session data to backend
- * POST /running/me/sessions
- */
 export const saveRunningSession = async (data: SaveRunningSessionData) => {
   const payload = {
     distanceKm: data.distanceKm,
@@ -57,27 +53,18 @@ export const saveRunningSession = async (data: SaveRunningSessionData) => {
     date: data.date || new Date().toISOString().split('T')[0], // Default to today
   };
 
+  console.log('Saving running session with payload: ', payload);
+
   const res = await instance.post('/running/me/sessions', payload);
   return res.data;
 }
 
-/**
- * Get today's running data for the user
- * GET /running/me/today
- * @param date Optional date in YYYY-MM-DD format, defaults to today
- */
-export const getTodayRunningData = async (date?: string): Promise<TodayRunningDataResponse> => {
-  const params: Record<string, any> = {};
-  if (date) params.date = date;
-
-  const res = await instance.get('/running/me/today', { params });
+export const getTodayRunningData = async (): Promise<TodayRunningDataResponse> => {
+  const params: Record<string, any> = {}; 
+  const res = await instance.get('/running/me/today');
   return res.data as TodayRunningDataResponse;
 }
 
-/**
- * Get running statistics for a date range
- * GET /running/me/stats?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&groupBy=day|week
- */
 export interface RunningStatsResponse {
   stats: Array<{
     date: string; // YYYY-MM-DD or week identifier

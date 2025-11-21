@@ -1,12 +1,16 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PersonalInfoScreen() {
   const [birthday, setBirthday] = useState('');
   const [gender, setGender] = useState<boolean | null>(null); // true = male, false = female
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(2000);
+  const [selectedMonth, setSelectedMonth] = useState(1);
+  const [selectedDay, setSelectedDay] = useState(1);
 
   const handleContinue = async () => {
     if (!birthday || gender === null) {
@@ -46,15 +50,103 @@ export default function PersonalInfoScreen() {
         {/* Birthday Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Birthday</Text>
-          <TextInput
+          <TouchableOpacity 
             style={styles.input}
-            placeholder="YYYY-MM-DD (e.g., 1990-01-01)"
-            value={birthday}
-            onChangeText={setBirthday}
-            placeholderTextColor="#999"
-          />
-          <Text style={styles.hint}>Format: YYYY-MM-DD</Text>
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={[styles.dateText, !birthday && styles.placeholderText]}>
+              {birthday || 'Select your birthday'}
+            </Text>
+          </TouchableOpacity>
         </View>
+
+        {/* Custom Date Picker Modal */}
+        <Modal
+          visible={showDatePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Birthday</Text>
+                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                  <MaterialIcons name="close" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+              
+              {/* Date Pickers */}
+              <View style={styles.pickerContainer}>
+                {/* Year */}
+                <View style={styles.pickerColumn}>
+                  <Text style={styles.pickerLabel}>Year</Text>
+                  <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                      <TouchableOpacity
+                        key={year}
+                        style={[styles.pickerItem, selectedYear === year && styles.pickerItemActive]}
+                        onPress={() => setSelectedYear(year)}
+                      >
+                        <Text style={[styles.pickerItemText, selectedYear === year && styles.pickerItemTextActive]}>
+                          {year}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                {/* Month */}
+                <View style={styles.pickerColumn}>
+                  <Text style={styles.pickerLabel}>Month</Text>
+                  <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                      <TouchableOpacity
+                        key={month}
+                        style={[styles.pickerItem, selectedMonth === month && styles.pickerItemActive]}
+                        onPress={() => setSelectedMonth(month)}
+                      >
+                        <Text style={[styles.pickerItemText, selectedMonth === month && styles.pickerItemTextActive]}>
+                          {month.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                {/* Day */}
+                <View style={styles.pickerColumn}>
+                  <Text style={styles.pickerLabel}>Day</Text>
+                  <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                      <TouchableOpacity
+                        key={day}
+                        style={[styles.pickerItem, selectedDay === day && styles.pickerItemActive]}
+                        onPress={() => setSelectedDay(day)}
+                      >
+                        <Text style={[styles.pickerItemText, selectedDay === day && styles.pickerItemTextActive]}>
+                          {day.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+
+              {/* Confirm Button */}
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={() => {
+                  const formattedDate = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
+                  setBirthday(formattedDate);
+                  setShowDatePicker(false);
+                }}
+              >
+                <Text style={styles.confirmButtonText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         {/* Gender Selection */}
         <View style={styles.inputContainer}>
@@ -157,6 +249,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#222',
     backgroundColor: '#F9F9F9',
+    justifyContent: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#222',
+  },
+  placeholderText: {
+    color: '#999',
   },
   hint: {
     fontSize: 12,
@@ -190,7 +290,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 24,
-    paddingBottom: 36,
+    paddingBottom: 50,
   },
   continueButton: {
     backgroundColor: '#00D2E6',
@@ -202,6 +302,91 @@ const styles = StyleSheet.create({
     backgroundColor: '#CCC',
   },
   continueButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '60%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#222',
+  },
+  dateList: {
+    maxHeight: 400,
+  },
+  dateItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  dateItemText: {
+    fontSize: 16,
+    color: '#222',
+    textAlign: 'center',
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    padding: 20,
+    gap: 10,
+  },
+  pickerColumn: {
+    flex: 1,
+  },
+  pickerLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  pickerScroll: {
+    maxHeight: 200,
+    flexGrow: 0,
+  },
+  pickerItem: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  pickerItemActive: {
+    backgroundColor: '#E0F7FA',
+    borderRadius: 8,
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  pickerItemTextActive: {
+    color: '#00D2E6',
+    fontWeight: '700',
+  },
+  confirmButton: {
+    backgroundColor: '#00D2E6',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',

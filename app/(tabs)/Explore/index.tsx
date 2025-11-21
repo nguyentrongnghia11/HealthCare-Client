@@ -1,6 +1,5 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
 import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-paper";
 
@@ -195,7 +194,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginRight: 12,
     overflow: "hidden",
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   blogImage: {
     width: "100%",

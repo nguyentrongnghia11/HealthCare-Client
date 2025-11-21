@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from "react-native"
-import EditBedtime from "./edit-bedtime"
+import { Link } from "expo-router";
+import { useState } from "react";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import back from '../../../assets/images/overview/back.png';
-import { Link } from "expo-router"
+import EditBedtime from "./edit-bedtime";
 
 export default function Sleep() {
   const [activeTab, setActiveTab] = useState("weekly")
@@ -231,7 +231,7 @@ export default function Sleep() {
         {/* Stats Section */}
         <View style={styles.statsSection}>
           <Text style={styles.statsText}>Your average time of sleep a day is</Text>
-          <Text style={styles.sleepTime}>7h 31{"\n"}min</Text>
+          <Text style={styles.sleepTime}>7h31 min</Text>
         </View>
 
         {/* Tabs */}
