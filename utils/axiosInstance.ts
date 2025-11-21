@@ -3,7 +3,7 @@ import axios from 'axios';
 import { router } from 'expo-router';
 
 const instance = axios.create({
-  baseURL: 'http://192.168.1.3:3000',
+  baseURL: 'http://10.35.107.160:3000',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -59,16 +59,25 @@ instance.interceptors.response.use(
     originalRequest._retry = true;
     isRefreshing = true;
 
+    console.log('🔄 Access token expired, attempting refresh...');
+
     try {
       const refreshToken = await AsyncStorage.getItem('refreshToken');
+      
+      if (!refreshToken) {
+        console.error('❌ No refresh token found in storage');
+        throw new Error('No refresh token available');
+      }
+
+      console.log('📤 Calling refresh endpoint...');
       
       if (!refreshToken) {
         throw new Error('No refresh token available');
       }
 
-      // Call refresh endpoint
+      // Call refresh endpoint - use the same baseURL
       const response = await axios.post(
-        'http://192.168.1.3:3000/auth/refresh',
+        `${instance.defaults.baseURL}/auth/refresh`,
         { refreshToken },
         {
           headers: {
@@ -77,24 +86,29 @@ instance.interceptors.response.use(
         }
       );
 
-      const { access_token, refresh_token } = response.data;
+      // Support both snake_case and camelCase response formats
+      const { access_token, accessToken, refresh_token, refreshToken: newRefreshToken } = response.data;
+      const newAccessToken = access_token || accessToken;
+      const newRefresh = refresh_token || newRefreshToken;
       
-      if (!access_token) {
+      if (!newAccessToken) {
         throw new Error('No access token in refresh response');
       }
 
+      console.log('✅ Refresh token successful, new access token received');
+
       // Save new tokens
-      await AsyncStorage.setItem('token', access_token);
-      if (refresh_token) {
-        await AsyncStorage.setItem('refreshToken', refresh_token);
+      await AsyncStorage.setItem('token', newAccessToken);
+      if (newRefresh) {
+        await AsyncStorage.setItem('refreshToken', newRefresh);
       }
 
       // Update default header
-      instance.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
-      originalRequest.headers['Authorization'] = 'Bearer ' + access_token;
+      instance.defaults.headers.common['Authorization'] = 'Bearer ' + newAccessToken;
+      originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
 
       // Process queued requests
-      processQueue(null, access_token);
+      processQueue(null, newAccessToken);
       
       isRefreshing = false;
 
@@ -103,11 +117,13 @@ instance.interceptors.response.use(
 
     } catch (refreshError) {
       // Refresh failed, clear auth data and redirect to login
+      console.error('❌ Refresh token failed:', refreshError);
       processQueue(refreshError, null);
       isRefreshing = false;
 
       await AsyncStorage.multiRemove(['token', 'refreshToken', 'user']);
       
+      console.log('🚪 Redirecting to login...');
       // Redirect to login
       setTimeout(() => {
         router.replace('/login');

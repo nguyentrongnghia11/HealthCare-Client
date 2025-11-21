@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native"
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 export default function Blogs() {
   const blogData = [
@@ -80,14 +80,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
     backgroundColor: "#ffffff",
     borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   imageContainer: {
     height: 160,

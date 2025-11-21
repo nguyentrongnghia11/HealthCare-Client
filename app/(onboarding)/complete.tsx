@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { updateUserDetail } from '../../api/user';
 
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: '#E5E5E5',
     marginHorizontal: 24,
-    marginTop: 16,
+    marginTop: 30,
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 24,
-    paddingTop: 40,
+    paddingTop: 20,
     alignItems: 'center',
     paddingBottom: 24,
   },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 24,
-    paddingBottom: 36,
+    paddingBottom: 50,
   },
   completeButton: {
     backgroundColor: '#00D2E6',

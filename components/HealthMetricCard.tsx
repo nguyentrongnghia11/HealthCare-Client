@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface HealthMetric {
   id: string
@@ -14,6 +14,7 @@ interface HealthMetric {
 
 interface HealthMetricCardProps {
   metric: HealthMetric
+  onPress?: () => void
 }
 
 const healthMetricsIcon = [
@@ -49,7 +50,7 @@ const healthMetricsIcon = [
   },
 ];
 
-export function HealthMetricCard({ metric }: HealthMetricCardProps) {
+export function HealthMetricCard({ metric, onPress }: HealthMetricCardProps) {
   // Tìm icon config theo id
   const config = healthMetricsIcon.find(item => item.id === metric.id);
 
@@ -57,7 +58,7 @@ export function HealthMetricCard({ metric }: HealthMetricCardProps) {
   const iconBg = config ? config.iconBg : metric.iconBg;
 
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
         <Text style={styles.icon}>{icon}</Text>
       </View>

@@ -17,51 +17,6 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    // <Tabs
-    //   screenOptions={{
-    //     tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-    //     // Disable the static render of the header on web
-    //     // to prevent a hydration error in React Navigation v6.
-    //     headerShown: useClientOnlyValue(false, true),
-    //     tabBarPosition: 'bottom'
-    //   }}>
-    //   <Tabs.Screen
-    //     name="Overview"
-    //     options={{
-    //       title: 'Explore',
-    //       tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-    //       headerRight: () => (
-    //         <Link href="/modal" asChild>
-    //           <Pressable>
-    //             {({ pressed }) => (
-    //               <FontAwesome
-    //                 name="info-circle"
-    //                 size={25}
-    //                 color={Colors[colorScheme ?? 'light'].text}
-    //                 style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-    //               />
-    //             )}
-    //           </Pressable>
-    //         </Link>
-    //       ),
-    //     }}
-    //   />
-    //   <Tabs.Screen
-    //     name="Explore"
-    //     options={{
-    //       title: 'Overview',
-    //         tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-    //     }}
-    //   />
-
-    //   <Tabs.Screen
-    //     name="Sharing"
-    //     options={{
-    //       title: 'Sharing',
-    //         tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-    //     }}
-    //   />
-    // </Tabs>
     <Tabs
       screenOptions={{
         headerShown: false,   // 👈 Ẩn header cho tất cả tab
@@ -93,10 +48,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Sharing"
+        name="Settings"
         options={{
-          tabBarLabel: 'Sharing',
-          tabBarIcon: ({ color }) => <TabBarIcon name="share-alt" color={color} />,
+          tabBarLabel: 'Settings',
+          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
       <Tabs.Screen
