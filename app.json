@@ -3,7 +3,6 @@
     "name": "heath_care_cli",
     "slug": "heath_care_cli",
     "version": "1.0.0",
-    "owner": "trongnghia599",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "heathcarecli",
@@ -18,7 +17,15 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Ứng dụng cần truy cập vị trí của bạn để theo dõi quãng đường chạy và tính toán calo tiêu thụ.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Ứng dụng cần theo dõi vị trí trong nền để tiếp tục tính toán khi bạn khóa màn hình."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Ứng dụng cần theo dõi vị trí trong nền để tiếp tục tính toán khi bạn khóa màn hình.",
+        "SKAdNetworkItems": [
+          {
+            "SKAdNetworkIdentifier": "v9wttpbfk9.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork"
+          }
+        ]
       }
     },
     "android": {
@@ -51,8 +58,9 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.INTERNET"
       ]
     },
     "web": {
@@ -86,7 +94,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "67d413cb-4868-496d-828c-bf78c39a1dfb"
+        "projectId": "aaf73e74-14b9-49a4-9865-efad6c90eeba"
       }
     }
   }

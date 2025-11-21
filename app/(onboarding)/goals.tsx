@@ -1,10 +1,10 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-type Goal = 'maintain' | 'gain' | 'lose' | '';
+type Goal = 'maintain' | 'gain' | 'lost' | '';
 
 export default function GoalsScreen() {
   const [goal, setGoal] = useState<Goal>('');
@@ -12,7 +12,7 @@ export default function GoalsScreen() {
   const [targetTimeDays, setTargetTimeDays] = useState('');
 
   const goals = [
-    { id: 'lose' as Goal, title: 'Lose Weight', emoji: '🔥', description: 'Burn calories and reduce body fat' },
+    { id: 'lost' as Goal, title: 'Lose Weight', emoji: '🔥', description: 'Burn calories and reduce body fat' },
     { id: 'maintain' as Goal, title: 'Maintain Weight', emoji: '⚖️', description: 'Keep your current weight' },
     { id: 'gain' as Goal, title: 'Gain Weight', emoji: '💪', description: 'Build strength and muscle mass' },
   ];
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 24,
-    paddingBottom: 36,
+    paddingBottom: 50,
   },
   continueButton: {
     backgroundColor: '#00D2E6',

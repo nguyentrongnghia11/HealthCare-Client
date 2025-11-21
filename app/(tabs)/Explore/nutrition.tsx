@@ -2,14 +2,15 @@
 
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { useEffect, useState } from "react"
-import { Dimensions, ScrollView, StyleSheet, View } from "react-native"
-import { Button, IconButton, Text, useTheme } from "react-native-paper"
+import { ActivityIndicator, Dimensions, ScrollView, StatusBar, StyleSheet, View } from "react-native"
+import { Button, IconButton, Text, useTheme as usePaperTheme } from "react-native-paper"
 import { getCalories } from '../../../api/nutrition'
 import { AddMealModal } from "../../../components/AddMealModalProps"
 import CalendarPicker from "../../../components/CalendarPicker"
 import MealListItem from "../../../components/MealListItem"
 import { NutritionStats } from "../../../components/NutritionStats"
 import { ProgressCircle } from "../../../components/ProgressCircle"
+import { Colors, useTheme } from '../../../contexts/ThemeContext'
 
 const { width } = Dimensions.get("window")
 const CHART_SIZE = width * 0.6
@@ -41,11 +42,14 @@ const mockMeals: { [key: string]: Meal[] } = {
 }
 
 export default function NutritionScreen() {
-    const theme = useTheme()
+    const paperTheme = usePaperTheme()
+    const { isDark } = useTheme()
+    const colors = isDark ? Colors.dark : Colors.light
     const [showAddMealModal, setShowAddMealModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState(new Date())
 
     const [loading, setLoading] = useState(false)
+    const [isUploading, setIsUploading] = useState(false)
     const [apiSummary, setApiSummary] = useState<any | null>(null)
     const [apiUser, setApiUser] = useState<any | null>(null)
     const [apiMeals, setApiMeals] = useState<Meal[]>([])
@@ -128,11 +132,12 @@ export default function NutritionScreen() {
     }, [selectedDate])
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
             {/* Header */}
             <View style={styles.header}>
-                <IconButton icon="chevron-left" size={28} onPress={() => { }} style={styles.backButton} />
-                <Text variant="headlineMedium" style={styles.headerTitle}>
+                <IconButton icon="chevron-left" size={28} onPress={() => { }} style={styles.backButton} iconColor={colors.text} />
+                <Text variant="headlineMedium" style={[styles.headerTitle, { color: colors.text }]}>
                     Nutrition
                 </Text>
                 <View style={styles.spacer} />
@@ -147,14 +152,14 @@ export default function NutritionScreen() {
 
                 <View style={styles.titleSection}>
                     <View style={styles.consumedContainer}>
-                        <Text variant="headlineLarge" style={{ fontWeight: "700" }}>
+                        <Text variant="headlineLarge" style={{ fontWeight: "700", color: colors.text }}>
                             Consumed{" "}
                         </Text>
                         <Text variant="headlineLarge" style={styles.caloriesHighlight}>
                             {nutritionData.consumed} kcal
                         </Text>
                     </View>
-                    <Text variant="bodyLarge" style={styles.subtitle}>
+                    <Text variant="bodyLarge" style={[styles.subtitle, { color: colors.textSecondary }]}>
                         {isToday() ? "today" : "on this day"}
                     </Text>
                 </View>
@@ -198,7 +203,7 @@ export default function NutritionScreen() {
                 </View>
 
                 <View style={styles.mealsSection}>
-                    <Text variant="titleMedium" style={styles.mealsSectionTitle}>
+                    <Text variant="titleMedium" style={[styles.mealsSectionTitle, { color: colors.text }]}>
                         Meals Today
                     </Text>
                     {currentMeals.length > 0 ? (
@@ -216,8 +221,8 @@ export default function NutritionScreen() {
                         </View>
                     ) : (
                         <View style={styles.emptyState}>
-                            <MaterialCommunityIcons name={"plate-empty" as any} size={48} color="#CCC" />
-                            <Text style={styles.emptyStateText}>No meals logged for this day</Text>
+                            <MaterialCommunityIcons name={"plate-empty" as any} size={48} color={isDark ? "#666" : "#CCC"} />
+                            <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>No meals logged for this day</Text>
                         </View>
                     )}
                 </View>
@@ -247,7 +252,19 @@ export default function NutritionScreen() {
                 nutritionData={nutritionData}
                 setNutritionData={setNutritionData}
                 onSuccess={fetchData}
+                isUploading={isUploading}
+                setIsUploading={setIsUploading}
             />
+
+            {/* Loading Overlay */}
+            {isUploading && (
+                <View style={styles.loadingOverlay}>
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#00BDD4" />
+                        <Text style={styles.loadingText}>Đang phân tích món ăn...</Text>
+                    </View>
+                </View>
+            )}
         </View>
     )
 }
@@ -316,7 +333,6 @@ const styles = StyleSheet.create({
     mealsSectionTitle: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#333",
         marginBottom: 12,
     },
     mealsList: {
@@ -353,5 +369,33 @@ const styles = StyleSheet.create({
     addButtonLabel: {
         fontSize: 16,
         fontWeight: "600",
+    },
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+    loadingContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 32,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
     },
 })

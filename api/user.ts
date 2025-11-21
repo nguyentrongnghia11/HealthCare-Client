@@ -6,7 +6,7 @@ interface UserDetail {
   height: number;
   weight: number;
   activityLevel: string;
-  target: 'lose' | 'maintain' | 'gain';
+  target: 'lost' | 'maintain' | 'gain';
   targetWeight: number;
   targetTimeDays: number;
 }

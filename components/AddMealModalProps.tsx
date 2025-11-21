@@ -23,6 +23,8 @@ interface AddMealModalProps {
   nutritionData: NutritionData,
   setNutritionData: any,
   onSuccess?: () => void
+  isUploading?: boolean
+  setIsUploading?: (value: boolean) => void
 }
 
 type IconName = "image-plus" | "camera" | "pencil"
@@ -71,9 +73,17 @@ const menuOptions: MenuOption[] = [
   },
 ]
 
-export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, nutritionData, setNutritionData, onSuccess }) => {
+export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, nutritionData, setNutritionData, onSuccess, isUploading: externalIsUploading, setIsUploading: externalSetIsUploading }) => {
   const [slideAnim] = React.useState(new Animated.Value(0))
   const [showManualEntry, setShowManualEntry] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const actualSetIsUploading = (value: boolean) => {
+    setIsUploading(value);
+    if (externalSetIsUploading) {
+      externalSetIsUploading(value);
+    }
+  };
 
   React.useEffect(() => {
     if (visible) {
@@ -151,7 +161,7 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, 
   };
 
   const handleUpload = async (uri: string) => {
-    Alert.alert('Đang tải lên', 'Vui lòng chờ trong khi ảnh của bạn được tải lên...');
+    actualSetIsUploading(true);
     try {
       const responseData = await uploadImage(uri);
 
@@ -175,9 +185,15 @@ export const AddMealModal: React.FC<AddMealModalProps> = ({ visible, onDismiss, 
       console.log("new nutrition ", newNutritionData)
 
       setNutritionData(newNutritionData)
+      Alert.alert('Thành công', 'Đã thêm món ăn thành công!');
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Lỗi khi upload: ', error);
       Alert.alert('Tải lên thất bại', 'Đã có lỗi xảy ra khi tải ảnh lên.');
+    } finally {
+      actualSetIsUploading(false);
     }
   };
 

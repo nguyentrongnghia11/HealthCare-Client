@@ -1,48 +1,136 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getWeeklyStats, WeeklyStats } from "../../api/overview";
+import { Colors, useTheme } from "../../contexts/ThemeContext";
+import StatsChartModal from "./StatsChartModal";
 
 export default function ThisWeekReport() {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
+  const [stats, setStats] = useState<WeeklyStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedStat, setSelectedStat] = useState<{ type: 'steps' | 'calories' | 'water' | 'sleep', title: string } | null>(null);
+
+  useEffect(() => {
+    loadWeeklyStats();
+  }, []);
+
+  const loadWeeklyStats = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getWeeklyStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Error loading weekly stats:', error);
+      // Use default values on error
+      setStats({
+        steps: 0,
+        caloriesBurned: 0,
+        waterMl: 0,
+        sleepMinutes: 0,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatSleepTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}min`;
+  };
+
+  const handleCardPress = (type: 'steps' | 'calories' | 'water' | 'sleep', title: string) => {
+    setSelectedStat({ type, title });
+    setModalVisible(true);
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.titleContainer}>
+          <Text style={[styles.title, { color: colors.text }]}>This week report</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#00D2E6" />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>This week report</Text>
+        <Text style={[styles.title, { color: colors.text }]}>This week report</Text>
         <TouchableOpacity>
-          <Text style={styles.viewMore}>View more →</Text>
+          <Text style={[styles.viewMore, { color: colors.textSecondary }]}>View more →</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.grid}>
-        <View key={1} style={styles.reportItem}>
+        <TouchableOpacity 
+          style={[styles.reportItem, { backgroundColor: colors.surface, borderColor: isDark ? '#00D2E6' : '#27b315' }]}
+          onPress={() => handleCardPress('steps', 'Steps')}
+        >
           <View style={styles.iconContainer}>
             <Text style={styles.icon}>👟</Text>
-            <Text style={styles.itemTitle}>Steps</Text>
+            <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Steps</Text>
           </View>
-          <Text style={styles.itemValue}>697,978</Text>
-        </View>
+          <Text style={[styles.itemValue, { color: colors.text }]}>
+            {stats?.steps.toLocaleString() || '0'}
+          </Text>
+        </TouchableOpacity>
 
-        <View key={2} style={styles.reportItem}>
+        <TouchableOpacity 
+          style={[styles.reportItem, { backgroundColor: colors.surface, borderColor: isDark ? '#00D2E6' : '#27b315' }]}
+          onPress={() => handleCardPress('calories', 'Calories Burned')}
+        >
             <View style={styles.iconContainer}>
-              <Text style={styles.icon}>💪</Text>
-              <Text style={styles.itemTitle}>Workout</Text>
+              <Text style={styles.icon}>🔥</Text>
+              <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Calories</Text>
             </View>
-            <Text style={styles.itemValue}>6h 45min</Text>
-          </View>
+            <Text style={[styles.itemValue, { color: colors.text }]}>
+              {stats?.caloriesBurned.toLocaleString() || '0'} kcal
+            </Text>
+          </TouchableOpacity>
 
-          <View key={3} style={styles.reportItem}>
+          <TouchableOpacity 
+            style={[styles.reportItem, { backgroundColor: colors.surface, borderColor: isDark ? '#00D2E6' : '#27b315' }]}
+            onPress={() => handleCardPress('water', 'Water Intake')}
+          >
             <View style={styles.iconContainer}>
               <Text style={styles.icon}>💧</Text>
-              <Text style={styles.itemTitle}>Water</Text>
+              <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Water</Text>
             </View>
-            <Text style={styles.itemValue}>10,659 ml</Text>
-          </View>
+            <Text style={[styles.itemValue, { color: colors.text }]}>
+              {stats?.waterMl.toLocaleString() || '0'} ml
+            </Text>
+          </TouchableOpacity>
 
-          <View key={4} style={styles.reportItem}>
+          <TouchableOpacity 
+            style={[styles.reportItem, { backgroundColor: colors.surface, borderColor: isDark ? '#00D2E6' : '#27b315' }]}
+            onPress={() => handleCardPress('sleep', 'Sleep Duration')}
+          >
             <View style={styles.iconContainer}>
               <Text style={styles.icon}>😴</Text>
-              <Text style={styles.itemTitle}>Sleep</Text>
+              <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Sleep</Text>
             </View>
-            <Text style={styles.itemValue}>29h 17min</Text>
-          </View>
+            <Text style={[styles.itemValue, { color: colors.text }]}>
+              {stats ? formatSleepTime(stats.sleepMinutes) : '0h 0min'}
+            </Text>
+          </TouchableOpacity>
       </View>
+
+      {/* Stats Chart Modal */}
+      {selectedStat && (
+        <StatsChartModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          type={selectedStat.type}
+          title={selectedStat.title}
+        />
+      )}
     </View>
   )
 }
@@ -60,11 +148,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#27b315",
   },
   viewMore: {
     fontSize: 14,
-    color: "#666666",
     fontWeight: "500",
   },
   grid: {
@@ -76,9 +162,8 @@ const styles = StyleSheet.create({
     width: "48%",
     marginBottom: 20,
     borderWidth: 1,
-    padding: 5,
-    borderRadius: 10,
-    borderColor: "#27b315",
+    padding: 12,
+    borderRadius: 12,
   },
   iconContainer: {
     flexDirection: "row",
@@ -91,12 +176,15 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 14,
-    color: "#666666",
     fontWeight: "500",
   },
   itemValue: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#000000",
+  },
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

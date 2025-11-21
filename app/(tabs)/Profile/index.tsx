@@ -2,13 +2,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -18,6 +20,7 @@ import {
 import { logout } from '../../../api/auth/auth';
 import { getUserDetail, updateUserDetail } from '../../../api/user';
 import account from '../../../assets/images/overview/account.png';
+import { Colors, useTheme } from '../../../contexts/ThemeContext';
 interface UserInfo {
   email?: string;
   username?: string;
@@ -30,17 +33,23 @@ interface UserDetailData {
   height: number;
   weight: number;
   activityLevel: string;
-  target: 'lose' | 'maintain' | 'gain';
+  target: 'lost' | 'maintain' | 'gain';
   targetWeight: number;
   targetTimeDays: number;
 }
 
 export default function ProfileScreen() {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({});
   const [userDetail, setUserDetail] = useState<UserDetailData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
+  const [selectedDay, setSelectedDay] = useState<number>(new Date().getDate());
 
   // Edit states
   const [editData, setEditData] = useState<UserDetailData>({
@@ -134,21 +143,23 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#00D2E6" />
-          <Text style={styles.loadingText}>Loading profile...</Text>
+          <Text style={[styles.loadingText, { color: colors.text }]}>Loading profile...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header with Gradient */}
         <LinearGradient
-          colors={['#00D2E6', '#00B8CC']}
+          colors={isDark ? ['#005566', '#004455'] : ['#00D2E6', '#00B8CC']}
           style={styles.headerGradient}
         >
           <View style={styles.headerContent}>
@@ -166,20 +177,20 @@ export default function ProfileScreen() {
         {/* Stats Cards */}
         {userDetail && (
           <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
               <MaterialIcons name="monitor-weight" size={24} color="#00D2E6" />
-              <Text style={styles.statValue}>{userDetail.weight} kg</Text>
-              <Text style={styles.statLabel}>Current</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>{userDetail.weight} kg</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Current</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
               <MaterialIcons name="flag" size={24} color="#FF6B6B" />
-              <Text style={styles.statValue}>{userDetail.targetWeight} kg</Text>
-              <Text style={styles.statLabel}>Target</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>{userDetail.targetWeight} kg</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Target</Text>
             </View>
-            <View style={styles.statCard}>
+            <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
               <MaterialIcons name="calendar-today" size={24} color="#4ECDC4" />
-              <Text style={styles.statValue}>{userDetail.targetTimeDays}</Text>
-              <Text style={styles.statLabel}>Days</Text>
+              <Text style={[styles.statValue, { color: colors.text }]}>{userDetail.targetTimeDays}</Text>
+              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Days</Text>
             </View>
           </View>
         )}
@@ -188,7 +199,7 @@ export default function ProfileScreen() {
         {userDetail && (
           <View style={styles.detailsContainer}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Personal Information</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Personal Information</Text>
               <TouchableOpacity 
                 onPress={() => setIsEditing(!isEditing)}
                 style={styles.editButton}
@@ -207,33 +218,39 @@ export default function ProfileScreen() {
             {/* Info Cards */}
             <View style={styles.infoCardsContainer}>
               {/* Birthday */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="cake" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Birthday</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Birthday</Text>
                   {isEditing ? (
-                    <TextInput
-                      style={styles.infoInput}
-                      value={editData.birthday}
-                      onChangeText={(text) => setEditData({ ...editData, birthday: text })}
-                      placeholder="YYYY-MM-DD"
-                      placeholderTextColor="#999"
-                    />
+                    <TouchableOpacity onPress={() => {
+                      const currentDate = editData.birthday ? new Date(editData.birthday) : new Date();
+                      setSelectedYear(currentDate.getFullYear());
+                      setSelectedMonth(currentDate.getMonth() + 1);
+                      setSelectedDay(currentDate.getDate());
+                      setShowDatePicker(true);
+                    }}>
+                      <Text style={[styles.infoInput, { color: colors.text, paddingVertical: 8 }]}>
+                        {editData.birthday ? new Date(editData.birthday).toLocaleDateString('en-GB') : 'Select date'}
+                      </Text>
+                    </TouchableOpacity>
                   ) : (
-                    <Text style={styles.infoValue}>{userDetail.birthday}</Text>
+                    <Text style={[styles.infoValue, { color: colors.text }]}>
+                      {new Date(userDetail.birthday).toLocaleDateString('en-GB')}
+                    </Text>
                   )}
                 </View>
               </View>
 
               {/* Gender */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="person" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Gender</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Gender</Text>
                   {isEditing ? (
                     <View style={styles.genderToggle}>
                       <TouchableOpacity
@@ -250,119 +267,119 @@ export default function ProfileScreen() {
                       </TouchableOpacity>
                     </View>
                   ) : (
-                    <Text style={styles.infoValue}>{userDetail.gender ? 'Male' : 'Female'}</Text>
+                    <Text style={[styles.infoValue, { color: colors.text }]}>{userDetail.gender ? 'Male' : 'Female'}</Text>
                   )}
                 </View>
               </View>
 
               {/* Height */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="height" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Height</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Height</Text>
                   {isEditing ? (
                     <TextInput
-                      style={styles.infoInput}
+                      style={[styles.infoInput, { color: colors.text }]}
                       value={editData.height.toString()}
                       onChangeText={(text) => setEditData({ ...editData, height: parseFloat(text) || 0 })}
                       keyboardType="decimal-pad"
                       placeholder="cm"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={isDark ? "#666" : "#999"}
                     />
                   ) : (
-                    <Text style={styles.infoValue}>{userDetail.height} cm</Text>
+                    <Text style={[styles.infoValue, { color: colors.text }]}>{userDetail.height} cm</Text>
                   )}
                 </View>
               </View>
 
               {/* Weight */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="monitor-weight" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Weight</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Weight</Text>
                   {isEditing ? (
                     <TextInput
-                      style={styles.infoInput}
+                      style={[styles.infoInput, { color: colors.text }]}
                       value={editData.weight.toString()}
                       onChangeText={(text) => setEditData({ ...editData, weight: parseFloat(text) || 0 })}
                       keyboardType="decimal-pad"
                       placeholder="kg"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={isDark ? "#666" : "#999"}
                     />
                   ) : (
-                    <Text style={styles.infoValue}>{userDetail.weight} kg</Text>
+                    <Text style={[styles.infoValue, { color: colors.text }]}>{userDetail.weight} kg</Text>
                   )}
                 </View>
               </View>
 
               {/* Activity Level */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="directions-run" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Activity Level</Text>
-                  <Text style={styles.infoValue}>{userDetail.activityLevel}</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Activity Level</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>{userDetail.activityLevel}</Text>
                 </View>
               </View>
 
               {/* Goal */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="flag" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Goal</Text>
-                  <Text style={styles.infoValue}>
-                    {userDetail.target === 'lose' ? 'Lose Weight' : userDetail.target === 'gain' ? 'Gain Weight' : 'Maintain Weight'}
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Goal</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {userDetail.target === 'lost' ? 'Lose Weight' : userDetail.target === 'gain' ? 'Gain Weight' : 'Maintain Weight'}
                   </Text>
                 </View>
               </View>
 
               {/* Target Weight */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="track-changes" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Target Weight</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Target Weight</Text>
                   {isEditing ? (
                     <TextInput
-                      style={styles.infoInput}
+                      style={[styles.infoInput, { color: colors.text }]}
                       value={editData.targetWeight.toString()}
                       onChangeText={(text) => setEditData({ ...editData, targetWeight: parseFloat(text) || 0 })}
                       keyboardType="decimal-pad"
                       placeholder="kg"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={isDark ? "#666" : "#999"}
                     />
                   ) : (
-                    <Text style={styles.infoValue}>{userDetail.targetWeight} kg</Text>
+                    <Text style={[styles.infoValue, { color: colors.text }]}>{userDetail.targetWeight} kg</Text>
                   )}
                 </View>
               </View>
 
               {/* Target Days */}
-              <View style={styles.infoCard}>
+              <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.infoIconContainer}>
                   <MaterialIcons name="event" size={20} color="#00D2E6" />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Target Days</Text>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Target Days</Text>
                   {isEditing ? (
                     <TextInput
-                      style={styles.infoInput}
+                      style={[styles.infoInput, { color: colors.text }]}
                       value={editData.targetTimeDays.toString()}
                       onChangeText={(text) => setEditData({ ...editData, targetTimeDays: parseInt(text) || 0 })}
                       keyboardType="number-pad"
                       placeholder="days"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={isDark ? "#666" : "#999"}
                     />
                   ) : (
-                    <Text style={styles.infoValue}>{userDetail.targetTimeDays} days</Text>
+                    <Text style={[styles.infoValue, { color: colors.text }]}>{userDetail.targetTimeDays} days</Text>
                   )}
                 </View>
               </View>
@@ -393,6 +410,91 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {/* Custom Date Picker Modal */}
+        <Modal
+          visible={showDatePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.pickerContainer, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.pickerLabel, { color: colors.text }]}>Select Birthday</Text>
+              <View style={styles.pickerRow}>
+                {/* Year Picker */}
+                <View style={styles.pickerColumn}>
+                  <Text style={[styles.pickerColumnLabel, { color: colors.textSecondary }]}>Year</Text>
+                  <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                      <TouchableOpacity
+                        key={year}
+                        style={[styles.pickerItem, selectedYear === year && styles.pickerItemActive]}
+                        onPress={() => setSelectedYear(year)}
+                      >
+                        <Text style={[styles.pickerItemText, { color: colors.text }, selectedYear === year && styles.pickerItemTextActive]}>
+                          {year}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                {/* Month Picker */}
+                <View style={styles.pickerColumn}>
+                  <Text style={[styles.pickerColumnLabel, { color: colors.textSecondary }]}>Month</Text>
+                  <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                      <TouchableOpacity
+                        key={month}
+                        style={[styles.pickerItem, selectedMonth === month && styles.pickerItemActive]}
+                        onPress={() => setSelectedMonth(month)}
+                      >
+                        <Text style={[styles.pickerItemText, { color: colors.text }, selectedMonth === month && styles.pickerItemTextActive]}>
+                          {month.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                {/* Day Picker */}
+                <View style={styles.pickerColumn}>
+                  <Text style={[styles.pickerColumnLabel, { color: colors.textSecondary }]}>Day</Text>
+                  <ScrollView style={styles.pickerScroll} showsVerticalScrollIndicator={false}>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                      <TouchableOpacity
+                        key={day}
+                        style={[styles.pickerItem, selectedDay === day && styles.pickerItemActive]}
+                        onPress={() => setSelectedDay(day)}
+                      >
+                        <Text style={[styles.pickerItemText, { color: colors.text }, selectedDay === day && styles.pickerItemTextActive]}>
+                          {day.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+              <View style={styles.pickerButtons}>
+                <TouchableOpacity
+                  style={[styles.pickerButton, styles.pickerButtonCancel]}
+                  onPress={() => setShowDatePicker(false)}
+                >
+                  <Text style={styles.pickerButtonTextCancel}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.pickerButton, styles.pickerButtonConfirm]}
+                  onPress={() => {
+                    const formattedDate = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
+                    setEditData({ ...editData, birthday: formattedDate });
+                    setShowDatePicker(false);
+                  }}
+                >
+                  <Text style={styles.pickerButtonTextConfirm}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <MaterialIcons name="logout" size={22} color="#FF3B30" />
@@ -408,13 +510,11 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F7FA',
   },
   loadingText: {
     marginTop: 16,
@@ -475,7 +575,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 6,
@@ -489,12 +588,10 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#222',
     marginTop: 8,
   },
   statLabel: {
     fontSize: 12,
-    color: '#999',
     marginTop: 4,
   },
   detailsContainer: {
@@ -507,9 +604,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#222',
   },
   editButton: {
     flexDirection: 'row',
@@ -533,7 +629,6 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
@@ -557,18 +652,15 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
-    color: '#999',
     fontWeight: '500',
     marginBottom: 4,
   },
   infoValue: {
     fontSize: 16,
-    color: '#222',
     fontWeight: '600',
   },
   infoInput: {
     fontSize: 16,
-    color: '#222',
     fontWeight: '600',
     borderWidth: 1,
     borderColor: '#E5E5E5',
@@ -643,5 +735,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#FF3B30',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  pickerContainer: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  pickerLabel: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  pickerColumn: {
+    flex: 1,
+  },
+  pickerColumnLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  pickerScroll: {
+    maxHeight: 200,
+    flexGrow: 0,
+  },
+  pickerItem: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  pickerItemActive: {
+    backgroundColor: '#E0F7FA',
+  },
+  pickerItemText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  pickerItemTextActive: {
+    color: '#00D2E6',
+    fontWeight: '700',
+  },
+  pickerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  pickerButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  pickerButtonCancel: {
+    backgroundColor: '#F5F5F5',
+  },
+  pickerButtonConfirm: {
+    backgroundColor: '#00D2E6',
+  },
+  pickerButtonTextCancel: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  pickerButtonTextConfirm: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

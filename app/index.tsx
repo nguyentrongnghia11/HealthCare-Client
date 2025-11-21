@@ -14,7 +14,7 @@ export default function Index() {
         async function checkLoginStatus() {
             try {
                 const token = await AsyncStorage.getItem('token');
-                
+
                 // No token found, redirect to login
                 if (!token) {
                     setIsLoggedIn(false);
@@ -23,7 +23,7 @@ export default function Index() {
 
                 // Verify token with backend
                 const isValid = await verifyToken();
-                
+
                 if (isValid) {
                     // Token is valid, check if user has detail from backend
                     console.log('Token is valid, checking user detail...');
@@ -35,7 +35,7 @@ export default function Index() {
                     // Token invalid, try to refresh
                     console.log('Token invalid, attempting refresh...');
                     const refreshed = await refreshAccessToken();
-                    
+
                     if (refreshed) {
                         console.log('Token refreshed successfully');
                         const userDetail = await getUserDetail();
@@ -66,18 +66,14 @@ export default function Index() {
             </View>
         );
     }
-    
+
     if (isLoggedIn) {
         console.log("User authenticated, onboarding completed:", onboardingCompleted);
-        // Check if onboarding is completed
         if (onboardingCompleted === false) {
-            console.log('Redirecting to onboarding/welcome');
             return <Redirect href="/(onboarding)/welcome" />;
         }
-        console.log('Redirecting to /Explore');
-        return <Redirect href="/Explore" />;
+        return <Redirect href="/Overview" />;
     }
 
-    // Redirect to login if not authenticated
     return <Redirect href="/login" />;
 }
