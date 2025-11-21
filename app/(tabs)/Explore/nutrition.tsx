@@ -2,7 +2,7 @@
 
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { useEffect, useState } from "react"
-import { Alert, Dimensions, ScrollView, StyleSheet, View } from "react-native"
+import { Dimensions, ScrollView, StyleSheet, View } from "react-native"
 import { Button, IconButton, Text, useTheme } from "react-native-paper"
 import { getCalories } from '../../../api/nutrition'
 import { AddMealModal } from "../../../components/AddMealModalProps"
@@ -71,75 +71,59 @@ export default function NutritionScreen() {
 
     const currentMeals = apiMeals.length > 0 ? apiMeals : (isToday() ? mockMeals.today : [])
 
-    const handleAddMeal = (type: "photo" | "camera" | "manual") => {
-        setShowAddMealModal(false)
+    const fetchData = async () => {
+        setLoading(true)
+        setError(null)
+        try {
 
-        switch (type) {
-            case "photo":
-                Alert.alert("Tải ảnh lên", "Chọn ảnh từ thư viện")
-                break
-            case "camera":
-                Alert.alert("Chụp ảnh", "Mở camera để chụp món ăn")
-                break
-            case "manual":
-                Alert.alert("Thêm thủ công", "Nhập thông tin dinh dưỡng")
-                break
+            console.log("249423sjdfshdf")
+            const dateStr = selectedDate.toISOString().split('T')[0]
+            const res = await getCalories(dateStr)
+
+            console.log("API response: ", res)
+
+            setApiUser(res.user ?? null)
+            setApiSummary(res.summary ?? null)
+
+            const meals = (res.meals || []).map((m: any) => ({
+                id: m._id || m.id || String(Math.random()),
+                name: m.foodName || m.name || 'Unknown',
+                time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+                calories: m.calories || 0,
+                category: 'lunch' as const,
+            }))
+            setApiMeals(meals)
+
+            // compute macro totals from meals
+            const totalProtein = (res.meals || []).reduce((s: number, it: any) => s + (it.protein || 0), 0)
+            const totalCarbs = (res.meals || []).reduce((s: number, it: any) => s + (it.carbs || 0), 0)
+            const totalFat = (res.meals || []).reduce((s: number, it: any) => s + (it.fat || 0), 0)
+
+            const goal = res.user?.goal ?? nutritionData.total
+
+            console.log("GOAL ", goal)
+            const consumed = res.summary?.consumed ?? 0
+
+            const proteinPct = res.user?.macroGoals?.protein ? Math.round((totalProtein * 100) / res.user.macroGoals.protein) : 0
+            const carbsPct = res.user?.macroGoals?.carb ? Math.round((totalCarbs * 100) / res.user.macroGoals.carb) : 0
+            const fatPct = res.user?.macroGoals?.fat ? Math.round((totalFat * 100) / res.user.macroGoals.fat) : 0
+
+            setNutritionData({
+                consumed,
+                total: goal,
+                percentage: goal ? Math.round((consumed * 100) / goal) : 0,
+                fat: { value: totalFat, percentage: fatPct },
+                protein: { value: totalProtein, percentage: proteinPct },
+                carbs: { value: totalCarbs, percentage: carbsPct },
+            })
+        } catch (e: any) {
+            setError(e.message ?? String(e))
+        } finally {
+            setLoading(false)
         }
     }
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true)
-            setError(null)
-            try {
-
-                console.log("249423sjdfshdf")
-                const dateStr = selectedDate.toISOString().split('T')[0]
-                const res = await getCalories(dateStr)
-
-                console.log("API response: ", res)
-
-                setApiUser(res.user ?? null)
-                setApiSummary(res.summary ?? null)
-
-                const meals = (res.meals || []).map((m: any) => ({
-                    id: m._id || m.id || String(Math.random()),
-                    name: m.foodName || m.name || 'Unknown',
-                    time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-                    calories: m.calories || 0,
-                    category: 'lunch' as const,
-                }))
-                setApiMeals(meals)
-
-                // compute macro totals from meals
-                const totalProtein = (res.meals || []).reduce((s: number, it: any) => s + (it.protein || 0), 0)
-                const totalCarbs = (res.meals || []).reduce((s: number, it: any) => s + (it.carbs || 0), 0)
-                const totalFat = (res.meals || []).reduce((s: number, it: any) => s + (it.fat || 0), 0)
-
-                const goal = res.user?.goal ?? nutritionData.total
-
-                console.log("GOAL ", goal)
-                const consumed = res.summary?.consumed ?? 0
-
-                const proteinPct = res.user?.macroGoals?.protein ? Math.round((totalProtein * 100) / res.user.macroGoals.protein) : 0
-                const carbsPct = res.user?.macroGoals?.carb ? Math.round((totalCarbs * 100) / res.user.macroGoals.carb) : 0
-                const fatPct = res.user?.macroGoals?.fat ? Math.round((totalFat * 100) / res.user.macroGoals.fat) : 0
-
-                setNutritionData({
-                    consumed,
-                    total: goal,
-                    percentage: goal ? Math.round((consumed * 100) / goal) : 0,
-                    fat: { value: totalFat, percentage: fatPct },
-                    protein: { value: totalProtein, percentage: proteinPct },
-                    carbs: { value: totalCarbs, percentage: carbsPct },
-                })
-            } catch (e: any) {
-                setError(e.message ?? String(e))
-            } finally {
-                setLoading(false)
-            }
-        }
-
         fetchData()
     }, [selectedDate])
 
@@ -262,7 +246,7 @@ export default function NutritionScreen() {
                 onDismiss={() => setShowAddMealModal(false)}
                 nutritionData={nutritionData}
                 setNutritionData={setNutritionData}
-            // onSelectOption={handleAddMeal}
+                onSuccess={fetchData}
             />
         </View>
     )

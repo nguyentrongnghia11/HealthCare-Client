@@ -156,8 +156,10 @@ export default function ProfileScreen() {
               <Image source={account} style={styles.avatar} />
               <View style={styles.onlineBadge} />
             </View>
-            <Text style={styles.userName}>{userInfo.name || userInfo.username || 'User'}</Text>
-            <Text style={styles.userEmail}>{userInfo.email || 'No email'}</Text>
+            <Text style={styles.userName}>
+              {userInfo.username || (userInfo.email?.replace(/@gmail\.com$/, '') || 'User')}
+            </Text>
+            
           </View>
         </LinearGradient>
 
