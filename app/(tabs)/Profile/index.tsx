@@ -30,7 +30,7 @@ interface UserDetailData {
   height: number;
   weight: number;
   activityLevel: string;
-  target: 'lose' | 'maintain' | 'gain';
+  target: 'lost' | 'maintain' | 'gain';
   targetWeight: number;
   targetTimeDays: number;
 }
@@ -316,7 +316,7 @@ export default function ProfileScreen() {
                 <View style={styles.infoContent}>
                   <Text style={styles.infoLabel}>Goal</Text>
                   <Text style={styles.infoValue}>
-                    {userDetail.target === 'lose' ? 'Lose Weight' : userDetail.target === 'gain' ? 'Gain Weight' : 'Maintain Weight'}
+                    {userDetail.target === 'lost' ? 'Lose Weight' : userDetail.target === 'gain' ? 'Gain Weight' : 'Maintain Weight'}
                   </Text>
                 </View>
               </View>

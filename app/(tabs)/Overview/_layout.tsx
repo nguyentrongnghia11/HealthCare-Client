@@ -6,6 +6,8 @@ export default function IndexStackLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="three" options={{ headerShown: false }} />
       <Stack.Screen name="alldata" options={{ headerShown: false }} />
+      <Stack.Screen name="sleep" options={{ headerShown: false }} />
+      <Stack.Screen name="edit-bedtime" options={{ headerShown: false }} />
     </Stack>
   );
 }

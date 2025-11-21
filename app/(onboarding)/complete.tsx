@@ -23,18 +23,32 @@ export default function CompleteScreen() {
 
       // Send to backend: PUT /user/me/detail
       // Expected: {birthday, weight, height, activityLevel, target, targetTimeDays, targetWeight, gender:boolean}
+      let backendTarget = goal.target;
+      if (backendTarget === 'lose') {
+        backendTarget = 'lost';
+      }
+      
       const detailData = {
         birthday: personal.birthday, // YYYY-MM-DD string
         gender: personal.gender, // boolean: true=male, false=female
         height: physical.height, // number (cm)
         weight: physical.weight, // number (kg)
         activityLevel: activityLevel || 'moderate', // string
-        target: goal.target, // lose|maintain|gain
+        target: backendTarget, // lost|maintain|gain
         targetWeight: goal.targetWeight, // number
         targetTimeDays: goal.targetTimeDays, // number
       };
 
-      await updateUserDetail(detailData);
+      console.log('Sending data to backend:', detailData);
+
+      try {
+        await updateUserDetail(detailData);
+      } catch (err: any) {
+        console.log('API error status:', err.response?.status);
+        console.log('API error headers:', err.response?.headers);
+        console.log('API error data:', err.response?.data);
+        throw err;
+      }
 
       // Mark onboarding as complete
       await AsyncStorage.setItem('onboarding_completed', 'true');
