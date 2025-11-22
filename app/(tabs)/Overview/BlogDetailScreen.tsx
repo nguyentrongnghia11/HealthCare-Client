@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useLocalSearchParams, useRouter } from "expo-router"
-
-const API_URL = 'http://192.168.1.3:3000/posts'
+import { getPostById } from '../../../api/posts'
 
 const styles = StyleSheet.create({
   container: {
@@ -128,12 +127,7 @@ export default function BlogDetailScreen() {
     let mounted = true
     const fetchPost = async () => {
       try {
-        const res = await fetch(`${API_URL}/${id}`)
-        if (res.status === 404) {
-          if (mounted) setPost(null)
-          return
-        }
-        const data = await res.json()
+        const data = await getPostById(id as string)
         if (mounted) setPost(data)
       } catch (err) {
         console.error('Failed to load post', err)
@@ -158,7 +152,7 @@ export default function BlogDetailScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Text style={styles.backButtonText}>← Quay lại</Text>
+            <Text style={styles.backButtonText}>← Go back</Text>
           </TouchableOpacity>
         </View>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -178,9 +172,9 @@ export default function BlogDetailScreen() {
         </View>
 
         <View style={styles.notFoundContainer}>
-          <Text style={styles.notFoundTitle}>Bài viết không tìm thấy</Text>
+          <Text style={styles.notFoundTitle}>Post not found</Text>
           <TouchableOpacity style={styles.ctaButton} onPress={() => router.replace("/(tabs)/Overview/BlogListScreen") }>
-            <Text style={styles.ctaButtonText}>Về trang chủ</Text>
+            <Text style={styles.ctaButtonText}>Back to Home</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -193,7 +187,7 @@ export default function BlogDetailScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Text style={styles.backButtonText}>← Quay lại</Text>
+          <Text style={styles.backButtonText}>← Go back</Text>
         </TouchableOpacity>
       </View>
 
@@ -203,7 +197,7 @@ export default function BlogDetailScreen() {
         <View style={styles.article}>
           <View style={styles.contentContainer}>
             <Text style={styles.postDate}>
-              {post.date ? new Date(post.date).toLocaleDateString("vi-VN", {
+              {post.date ? new Date(post.date).toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
                 month: "long",
@@ -223,16 +217,12 @@ export default function BlogDetailScreen() {
 
             <View style={styles.ctaSection}>
               <TouchableOpacity style={styles.ctaButton} onPress={handleBack}>
-                <Text style={styles.ctaButtonText}>← Xem bài viết khác</Text>
+                <Text style={styles.ctaButtonText}>← View other posts</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </ScrollView>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2025 Blog của tôi. Tất cả quyền được bảo vệ.</Text>
-      </View>
     </SafeAreaView>
   )
 }

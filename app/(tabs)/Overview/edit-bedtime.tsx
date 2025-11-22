@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from "react-native"
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context";
 import back from '../../../assets/images/overview/back.png';
 import { Link } from "expo-router"
+import { saveSleepSchedule } from '../../../api/sleep'
 interface EditBedtimeProps {
   initialBedtime?: string
   initialWakeup?: string
@@ -23,6 +24,7 @@ export default function EditBedtime({
 
   const [wakeupHours, setWakeupHours] = useState(Number.parseInt(initialWakeup.split(":")[0]))
   const [wakeupMinutes, setWakeupMinutes] = useState(Number.parseInt(initialWakeup.split(":")[1]))
+  const [saving, setSaving] = useState(false)
 
   const styles = StyleSheet.create({
     container: {
@@ -160,7 +162,46 @@ export default function EditBedtime({
   const handleSave = () => {
     const formattedBedtime = `${String(bedtimeHours).padStart(2, "0")}:${String(bedtimeMinutes).padStart(2, "0")}`
     const formattedWakeup = `${String(wakeupHours).padStart(2, "0")}:${String(wakeupMinutes).padStart(2, "0")}`
-    onSave?.(formattedBedtime, formattedWakeup)
+
+    // Save directly to server and call onSave on success
+    const formatDate = (d = new Date()) => {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    }
+
+    const date = formatDate()
+
+    setSaving(true)
+    saveSleepSchedule({ date, bedtime: formattedBedtime, wakeup: formattedWakeup })
+      .then(() => {
+        setSaving(false)
+        onSave?.(formattedBedtime, formattedWakeup)
+        Alert.alert('Lưu thành công', 'Lịch ngủ đã được cập nhật')
+      })
+      .catch((err) => {
+        setSaving(false)
+        try {
+          console.groupCollapsed && console.groupCollapsed('Failed to save schedule - details')
+        } catch (e) {}
+        console.error('Failed to save schedule - message:', err?.message)
+        console.error('Failed to save schedule - status:', err?.response?.status)
+        console.error('Failed to save schedule - response.data:', err?.response?.data)
+        console.error('Failed to save schedule - response.headers:', err?.response?.headers)
+        console.error('Failed to save schedule - request:', err?.request)
+        console.error('Failed to save schedule - config:', err?.config)
+        console.error('Failed to save schedule - stack:', err?.stack)
+        try {
+          console.groupEnd && console.groupEnd()
+        } catch (e) {}
+
+        const status = err?.response?.status
+        const apiMsg = err?.response?.data?.message ?? err?.response?.data ?? null
+        const msg = apiMsg ? String(apiMsg) : err?.message || 'Lỗi khi lưu dữ liệu'
+        // Show a concise alert but include status for quick debugging on device
+        Alert.alert('Lỗi', `Status: ${status ?? 'N/A'}\n${msg}`)
+      })
   }
 
   const isBedtimePM = bedtimeHours >= 12
@@ -265,8 +306,12 @@ export default function EditBedtime({
           <TouchableOpacity style={[styles.button, styles.cancelBtn]} onPress={onBack}>
             <Text style={[styles.buttonText, styles.cancelBtnText]}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.saveBtn]} onPress={handleSave}>
-            <Text style={[styles.buttonText, styles.saveBtnText]}>Save</Text>
+          <TouchableOpacity style={[styles.button, styles.saveBtn]} onPress={handleSave} disabled={saving}>
+            {saving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={[styles.buttonText, styles.saveBtnText]}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
