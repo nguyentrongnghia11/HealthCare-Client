@@ -75,8 +75,44 @@ export const addManualMeal = async (data: ManualMealData) => {
     return res.data
 }
 
+export const getWeeklyCalories = async (): Promise<number> => {
+    try {
+        // Get dates for the current week (Monday to Sunday)
+        const now = new Date()
+        const dayOfWeek = now.getDay()
+        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek // Adjust to Monday
+        const monday = new Date(now)
+        monday.setDate(now.getDate() + diff)
+        monday.setHours(0, 0, 0, 0)
+        
+        let totalCalories = 0
+        
+        // Fetch calories for each day of the week
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(monday)
+            date.setDate(monday.getDate() + i)
+            const dateStr = date.toISOString().split('T')[0]
+            
+            try {
+                const data = await getCalories(dateStr)
+                const dayCalories = data.meals?.reduce((sum, meal) => {
+                    return sum + (meal.calories || 0)
+                }, 0) || 0
+                totalCalories += dayCalories
+            } catch (error) {
+                console.error(`Error fetching calories for ${dateStr}:`, error)
+            }
+        }
+        
+        return Math.round(totalCalories)
+    } catch (error) {
+        console.error('Error calculating weekly calories:', error)
+        return 0
+    }
+}
+
 export default {
     getCalories,
     addManualMeal,
+    getWeeklyCalories,
 }
-
