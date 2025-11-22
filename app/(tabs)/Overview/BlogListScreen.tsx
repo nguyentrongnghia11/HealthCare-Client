@@ -3,8 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, FlatList, ActivityIndi
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useRouter, Link } from "expo-router"
 import back from '../../../assets/images/overview/back.png';
-
-const API_URL = 'http://192.168.1.3:3000/posts'
+import { getPosts } from '../../../api/posts'
 
 export default function BlogListScreen() {
   const router = useRouter()
@@ -40,8 +39,7 @@ export default function BlogListScreen() {
     let mounted = true
     const fetchPosts = async () => {
       try {
-        const res = await fetch(API_URL)
-        const data = await res.json()
+        const data = await getPosts()
         console.log('Fetched posts:', data);
         if (mounted) setBlogPosts(data)
       } catch (err) {
@@ -61,7 +59,7 @@ export default function BlogListScreen() {
             <Image source={back} style={styles.headerButton} />
           </TouchableOpacity>
         </Link>
-        <Text style={styles.headerTitle}>Blog Của Tôi</Text>
+        <Text style={styles.headerTitle}>My Blog</Text>
       </View>
 
       {loading ? (
@@ -78,9 +76,6 @@ export default function BlogListScreen() {
         />
       )}
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2025 Blog của tôi. Tất cả quyền được bảo vệ.</Text>
-      </View>
     </SafeAreaView>
   )
 }
@@ -96,12 +91,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#e2e8f0",
+    flexDirection: "row",
+    alignItems: "center",
+    
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
     color: "#1e293b",
     marginBottom: 8,
+    alignItems: "center",
+    flex: 1,
+    textAlign: "center",
   },
   headerSubtitle: {
     fontSize: 16,
