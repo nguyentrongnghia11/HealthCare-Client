@@ -83,14 +83,14 @@ export default function CycleTrackingPage() {
     
     // States dữ liệu
     const [lastPeriodStartDate, setLastPeriodStartDate] = useState<Date | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true) // LOADING IS TRUE INITIALLY
     const [symptomsLog, setSymptomsLog] = useState<string[]>([]) 
 
     // Hàm refresh data chính
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            // LƯU Ý: Đảm bảo path của file 'api/cycle' là chính xác.
+            // Đây là nơi chờ đợi kết quả từ API, gây ra độ trễ.
             const statusResponse: CycleStatusResponse = await fetchCycleStatus(selectedDate.toISOString().split('T')[0]);
             
             if (statusResponse && statusResponse.latestLog && statusResponse.latestLog.startDate) {
@@ -101,7 +101,7 @@ export default function CycleTrackingPage() {
         } catch (error) {
             console.error("Failed to fetch cycle status:", error);
         } finally {
-            setLoading(false);
+            setLoading(false); // UI chính chỉ render sau khi hàm này kết thúc
         }
     }, [selectedDate]);
 
@@ -271,8 +271,9 @@ export default function CycleTrackingPage() {
             </View>
 
             {/* Menstrual health */}
-  {/*
-          <View style={styles.section}>
+            {/* Vui lòng bỏ comment (uncomment) phần này nếu bạn muốn hiển thị lại, đảm bảo đã import 'Image' từ react-native */}
+            {/*
+            <View style={styles.section}>
                 <View style={styles.rowBetween}>
                     <Text style={styles.sectionTitle}>Menstrual health</Text>
                     <TouchableOpacity>
@@ -304,7 +305,7 @@ export default function CycleTrackingPage() {
                     </View>
                 </View>
             </View>
-*/}
+            */}
 
 
             {/* ------------------------------------ */}
