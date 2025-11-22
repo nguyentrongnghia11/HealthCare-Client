@@ -1,6 +1,7 @@
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
-
+import { useRouter } from "expo-router";
 export default function Blogs() {
+  const router = useRouter();
   const blogData = [
     {
       id: 1,
@@ -20,11 +21,14 @@ export default function Blogs() {
     },
   ]
 
+  const handleViewMore = () => {
+    router.push("/Overview/BlogListScreen"); 
+  };
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Blogs</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleViewMore}>
           <Text style={styles.viewMore}>View more →</Text>
         </TouchableOpacity>
       </View>
