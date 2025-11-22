@@ -58,6 +58,9 @@ export default function TabOneScreen() {
     } else if (id === 'steps') {
       console.log('Navigating to step_stracker...');
       router.push('/(tabs)/Explore/step_stracker');
+    }else if (id === 'cycle') {
+      console.log('Navigating to cycle...');
+      router.push('/(tabs)/Overview/cycletracking');
     }
   };
 

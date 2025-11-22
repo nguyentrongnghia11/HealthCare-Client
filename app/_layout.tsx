@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '../components/useColorScheme';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { initializeNotifications } from '../utils/notificationService';
 import OtpProvider from './OtpContext';
 
 export {
@@ -40,15 +41,20 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  // Initialize notifications on app start
+  useEffect(() => {
+    initializeNotifications();
+  }, []);
+
+  return <RootLayoutNav loaded={loaded} />;
+}
+
+function RootLayoutNav({ loaded }: { loaded: boolean }) {
+  const colorScheme = useColorScheme();
+
   if (!loaded) {
     return null;
   }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
 
   return (
     <ThemeProvider>
