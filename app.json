@@ -94,8 +94,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "aaf73e74-14b9-49a4-9865-efad6c90eeba"
+        "projectId": "67d413cb-4868-496d-828c-bf78c39a1dfb"
       }
-    }
+    },
+    "owner": "nzzsobad"
   }
 }

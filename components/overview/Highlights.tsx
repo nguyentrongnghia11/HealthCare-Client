@@ -51,6 +51,9 @@ export default function Highlights() {
     if (item.title === "Sleep") {
       router.push("/Overview/sleep")
     }
+     if (item.title === "Cycle tracking") {
+      router.push("/Overview/cycletracking")
+    }
   }
   
   const highlightData = [
