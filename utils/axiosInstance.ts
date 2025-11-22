@@ -77,7 +77,7 @@ instance.interceptors.response.use(
 
       // Call refresh endpoint - use the same baseURL
       const response = await axios.post(
-        `${instance.defaults.baseURL}/auth/refresh`,
+        'http://192.168.1.3:3000/auth/refresh',
         { refreshToken },
         {
           headers: {
