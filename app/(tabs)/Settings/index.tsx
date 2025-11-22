@@ -1,17 +1,17 @@
-  
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  Alert,
-  Linking,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View
+    Alert,
+    Linking,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { ChangePasswordModal } from '../../../components/ChangePasswordModal';
 import { Colors, useTheme } from '../../../contexts/ThemeContext';
@@ -79,10 +79,9 @@ export default function SettingsScreen() {
           id: 'notifications',
           icon: 'notifications',
           title: 'Notifications',
-          subtitle: 'Get notified about your progress',
-          type: 'toggle' as const,
-          value: notifications,
-          onPress: () => handleNotificationToggle(!notifications),
+          subtitle: 'Manage meal & running reminders',
+          type: 'navigation' as const,
+          onPress: () => router.push('/(tabs)/Profile/notifications'),
           color: '#00D2E6',
           iconFamily: 'MaterialIcons' as const,
         },

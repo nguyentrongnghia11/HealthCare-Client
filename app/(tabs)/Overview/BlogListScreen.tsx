@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, Image, StyleSheet, FlatList, ActivityIndicator } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { useRouter, Link } from "expo-router"
+import { Link, useRouter } from "expo-router";
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { BlogPost, getBlogPosts } from '../../../api/overview';
 import back from '../../../assets/images/overview/back.png';
 import { getPosts } from '../../../api/posts'
 
@@ -32,15 +33,14 @@ export default function BlogListScreen() {
     });
   }
 
-  const [blogPosts, setBlogPosts] = useState<any[]>([])
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let mounted = true
     const fetchPosts = async () => {
       try {
-        const data = await getPosts()
-        console.log('Fetched posts:', data);
+        const data = await getBlogPosts()
         if (mounted) setBlogPosts(data)
       } catch (err) {
         console.error('Failed to load posts', err)

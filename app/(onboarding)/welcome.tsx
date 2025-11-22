@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import React from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function WelcomeScreen() {
@@ -36,7 +35,6 @@ export default function WelcomeScreen() {
           style={styles.skipButton}
           onPress={() => router.replace('/Explore')}
         >
-          <Text style={styles.skipButtonText}>Skip for now</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

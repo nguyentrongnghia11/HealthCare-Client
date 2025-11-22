@@ -85,3 +85,45 @@ export async function getNutritionStats(startDate: string, endDate: string): Pro
     throw error;
   }
 }
+
+/**
+ * Blog post interface
+ */
+export interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  image: string;
+  date: string;
+  content?: string;
+}
+
+/**
+ * Get all blog posts
+ * @returns Array of blog posts
+ */
+export async function getBlogPosts(): Promise<BlogPost[]> {
+  try {
+    const response = await instance.get('/posts');
+    console.log('Fetched posts:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching blog posts:', error.response?.data || error.message);
+    throw error;
+  }
+}
+
+/**
+ * Get a single blog post by ID
+ * @param id Blog post ID
+ * @returns Blog post details
+ */
+export async function getBlogPostById(id: string | number): Promise<BlogPost> {
+  try {
+    const response = await instance.get(`/posts/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching blog post:', error.response?.data || error.message);
+    throw error;
+  }
+}

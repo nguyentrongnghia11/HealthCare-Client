@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getWeeklyCalories } from "../../api/nutrition";
 import { getWeeklyStats, WeeklyStats } from "../../api/overview";
 import { Colors, useTheme } from "../../contexts/ThemeContext";
 import StatsChartModal from "./StatsChartModal";
@@ -8,19 +10,20 @@ export default function ThisWeekReport() {
   const { isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
   const [stats, setStats] = useState<WeeklyStats | null>(null);
+  const [weeklyCalories, setWeeklyCalories] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedStat, setSelectedStat] = useState<{ type: 'steps' | 'calories' | 'water' | 'sleep', title: string } | null>(null);
 
-  useEffect(() => {
-    loadWeeklyStats();
-  }, []);
-
-  const loadWeeklyStats = async () => {
+  const loadWeeklyStats = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await getWeeklyStats();
-      setStats(data);
+      const [statsData, caloriesData] = await Promise.all([
+        getWeeklyStats(),
+        getWeeklyCalories(),
+      ]);
+      setStats(statsData);
+      setWeeklyCalories(caloriesData);
     } catch (error) {
       console.error('Error loading weekly stats:', error);
       // Use default values on error
@@ -30,10 +33,18 @@ export default function ThisWeekReport() {
         waterMl: 0,
         sleepMinutes: 0,
       });
+      setWeeklyCalories(0);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadWeeklyStats();
+    }, [loadWeeklyStats])
+  );
 
   const formatSleepTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -84,14 +95,14 @@ export default function ThisWeekReport() {
 
         <TouchableOpacity 
           style={[styles.reportItem, { backgroundColor: colors.surface, borderColor: isDark ? '#00D2E6' : '#27b315' }]}
-          onPress={() => handleCardPress('calories', 'Calories Burned')}
+          onPress={() => handleCardPress('calories', 'Calories Consumed')}
         >
             <View style={styles.iconContainer}>
               <Text style={styles.icon}>🔥</Text>
               <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Calories</Text>
             </View>
             <Text style={[styles.itemValue, { color: colors.text }]}>
-              {stats?.caloriesBurned.toLocaleString() || '0'} kcal
+              {weeklyCalories.toLocaleString()} kcal
             </Text>
           </TouchableOpacity>
 
