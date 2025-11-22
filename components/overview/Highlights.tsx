@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router"
-import { useEffect, useState } from "react"
+import { useFocusEffect, useRouter } from "expo-router"
+import { useCallback, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { getCalories } from "../../api/nutrition"
 import { getTodayRunningData } from "../../api/running"
@@ -12,40 +12,40 @@ export default function Highlights() {
   const [runningKm, setRunningKm] = useState(0)
   
   // Fetch nutrition data
-  useEffect(() => {
-    const fetchNutritionData = async () => {
-      try {
-        const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-        const data = await getCalories(today)
-        
-        // Calculate total calories from meals
-        const totalCals = data.meals?.reduce((sum, meal) => {
-          return sum + (meal.calories || 0)
-        }, 0) || 0
-        
-        setNutritionCalories(Math.round(totalCals))
-      } catch (error) {
-        console.error('Failed to fetch nutrition data:', error)
-      }
+  const fetchNutritionData = useCallback(async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+      const data = await getCalories(today)
+      
+      // Calculate total calories from meals
+      const totalCals = data.meals?.reduce((sum, meal) => {
+        return sum + (meal.calories || 0)
+      }, 0) || 0
+      
+      setNutritionCalories(Math.round(totalCals))
+    } catch (error) {
+      console.error('Failed to fetch nutrition data:', error)
     }
-    
-    fetchNutritionData()
   }, [])
   
   // Fetch running data
-  useEffect(() => {
-    const fetchRunningData = async () => {
-      try {
-        const data = await getTodayRunningData()
-        const totalKm = data.summary?.totalDistanceKm || 0
-        setRunningKm(totalKm)
-      } catch (error) {
-        console.error('Failed to fetch running data:', error)
-      }
+  const fetchRunningData = useCallback(async () => {
+    try {
+      const data = await getTodayRunningData()
+      const totalKm = data.summary?.totalDistanceKm || 0
+      setRunningKm(totalKm)
+    } catch (error) {
+      console.error('Failed to fetch running data:', error)
     }
-    
-    fetchRunningData()
   }, [])
+
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchNutritionData()
+      fetchRunningData()
+    }, [fetchNutritionData, fetchRunningData])
+  )
 
   const handlePress = (item: any) => {
     if (item.title === "Sleep") {
