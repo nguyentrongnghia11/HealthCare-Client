@@ -2,14 +2,11 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-// Vui lòng đảm bảo các đường dẫn import dưới đây là chính xác trong cấu trúc dự án của bạn
 import { CycleStatusResponse, fetchCycleStatus, logPeriod, LogPeriodPayload, logSymptom, LogSymptomPayload } from '../../../api/cycle';
 import CalendarPicker from "../../../components/CalendarPicker";
 import LogPeriodModal from "../../../components/LogPeriodModal";
 import LogSymptomModal from "../../../components/LogSymptomModal";
-// =========================================================================
-// MOCK/HELPER LOGIC
-// =========================================================================
+
 
 const AVERAGE_CYCLE_LENGTH = 28;
 const LUTEAL_PHASE_LENGTH = 14; 
@@ -23,9 +20,6 @@ interface CycleStatus {
     ovulationDate: Date | null;
 }
 
-/**
- * Tính toán trạng thái chu kỳ dựa trên ngày được chọn và lịch sử.
- */
 const getCycleStatus = (selectedDate: Date, lastPeriodStartDate: Date): CycleStatus => {
     
     const nextPeriodStartDate = new Date(lastPeriodStartDate);
@@ -69,9 +63,6 @@ const getCycleStatus = (selectedDate: Date, lastPeriodStartDate: Date): CycleSta
     };
 };
 
-// =========================================================================
-// COMPONENT
-// =========================================================================
 
 export default function CycleTrackingPage() {
     const router = useRouter()
@@ -83,7 +74,7 @@ export default function CycleTrackingPage() {
     
     // States dữ liệu
     const [lastPeriodStartDate, setLastPeriodStartDate] = useState<Date | null>(null)
-    const [loading, setLoading] = useState(true) // LOADING IS TRUE INITIALLY
+    const [loading, setLoading] = useState(true) 
     const [symptomsLog, setSymptomsLog] = useState<string[]>([]) 
 
     // Hàm refresh data chính
@@ -270,53 +261,7 @@ export default function CycleTrackingPage() {
                 </View>
             </View>
 
-<<<<<<< HEAD
           
-=======
-            {/* Menstrual health */}
-            {/* Vui lòng bỏ comment (uncomment) phần này nếu bạn muốn hiển thị lại, đảm bảo đã import 'Image' từ react-native */}
-            {/*
-            <View style={styles.section}>
-                <View style={styles.rowBetween}>
-                    <Text style={styles.sectionTitle}>Menstrual health</Text>
-                    <TouchableOpacity>
-                        <Text style={styles.viewMore}>View more</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.row}>
-                    <View style={styles.healthCard}>
-                        <Image
-                            source={{ uri: "https://placehold.co/400x150/06b6d4/ffffff?text=Cravings" }}
-                            style={styles.image}
-                            onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
-                        />
-                        <Text style={styles.healthText}>
-                            Craving sweets on your period? Here's why & what to do about it
-                        </Text>
-                    </View>
-
-                    <View style={styles.healthCard}>
-                          <Image
-                            source={{ uri: "https://placehold.co/400x150/a855f7/ffffff?text=BirthControl" }}
-                            style={styles.image}
-                            onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
-                        />
-                        <Text style={styles.healthText}>
-                            Is birth control bad for your menstrual health?
-                        </Text>
-                    </View>
-                </View>
-            </View>
-            */}
-
-
-            {/* ------------------------------------ */}
-            {/* MODALS */}
-            {/* ------------------------------------ */}
-            
-            {/* Modal Nhập ngày kinh */}
->>>>>>> d72d46e7172116249f75167c2c98151eb9c5c3b3
             {isPeriodModalVisible && (
                 <LogPeriodModal 
                     visible={isPeriodModalVisible}
