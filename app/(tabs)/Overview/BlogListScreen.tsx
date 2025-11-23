@@ -9,8 +9,19 @@ import { getPosts } from '../../../api/posts'
 export default function BlogListScreen() {
   const router = useRouter()
 
+  // Helper: sort posts by date (newest first)
+  const sortPosts = (arr: any[]) => {
+    if (!Array.isArray(arr)) return [];
+    const toTime = (it: any) => {
+      const d = it?.date || it?.createdAt || '';
+      const t = Date.parse(d);
+      return isNaN(t) ? 0 : t;
+    };
+    return arr.slice().sort((a, b) => toTime(b) - toTime(a));
+  }
+
   const renderPostCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.postCard} onPress={() => handlePostPress(item.id)} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.postCard} onPress={() => handlePostPress(item.id || (item as any)._id)} activeOpacity={0.7}>
       <Image source={{ uri: item.image }} style={styles.postImage} />
       <View style={styles.postContent}>
         <Text style={styles.postDate}>{new Date(item.date).toLocaleDateString("vi-VN")}</Text>
@@ -41,7 +52,17 @@ export default function BlogListScreen() {
     const fetchPosts = async () => {
       try {
         const data = await getBlogPosts()
-        if (mounted) setBlogPosts(data)
+
+        // Cast to any to inspect possible shapes safely
+        const raw: any = data
+        // Normalize response: support direct array, { data: [...] }, or { posts: [...] }
+        let postsArray: any[] = []
+        if (Array.isArray(raw)) postsArray = raw
+        else if (raw && Array.isArray(raw.data)) postsArray = raw.data
+        else if (raw && Array.isArray(raw.posts)) postsArray = raw.posts
+        else postsArray = []
+
+        if (mounted) setBlogPosts(sortPosts(postsArray))
       } catch (err) {
         console.error('Failed to load posts', err)
       } finally {
@@ -67,10 +88,10 @@ export default function BlogListScreen() {
           <ActivityIndicator size="large" color="#2563eb" />
         </View>
       ) : (
-        <FlatList
+          <FlatList
           data={blogPosts}
           renderItem={renderPostCard}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) => ((item.id || (item as any)._id) || index).toString()}
           contentContainerStyle={styles.content}
           scrollEventThrottle={16}
         />

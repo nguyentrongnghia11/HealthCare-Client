@@ -105,7 +105,7 @@ export interface BlogPost {
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const response = await instance.get('/posts');
-    console.log('Fetched posts:', response.data);
+    // console.log('Fetched posts:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('Error fetching blog posts:', error.response?.data || error.message);
