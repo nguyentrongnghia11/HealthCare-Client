@@ -3,7 +3,7 @@ import axios from 'axios';
 import { router } from 'expo-router';
 
 const instance = axios.create({
-  baseURL: 'http://192.168.1.22:3000',
+  baseURL: 'https://healthcare-server-hlre.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

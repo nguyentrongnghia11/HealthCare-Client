@@ -83,10 +83,10 @@ export default function Highlights() {
     {
       id: 3,
       title: "Sleep",
-      value: todaySummary?.sleep.bedtime && todaySummary?.sleep.wakeup 
+      value: todaySummary?.sleep?.bedtime && todaySummary?.sleep?.wakeup 
         ? calculateSleepDuration(todaySummary.sleep.bedtime, todaySummary.sleep.wakeup)
         : "0h 0min",
-      subtitle: todaySummary?.sleep.wakeup ? `wake up at ${todaySummary.sleep.wakeup}` : "no data",
+      subtitle: todaySummary?.sleep?.wakeup ? `wake up at ${todaySummary.sleep.wakeup}` : "no data",
       backgroundColor: "#2C3E50",
       icon: "🌙",
     },

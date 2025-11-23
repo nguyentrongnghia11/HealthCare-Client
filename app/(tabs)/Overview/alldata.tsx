@@ -67,16 +67,10 @@ export default function TabOneScreen() {
       router.push('/(tabs)/Explore/nutrition');
     } else if (id === 'steps') {
       router.push('/(tabs)/Explore/step_stracker');
-<<<<<<< HEAD
     } else if (id === 'cycle') {
       router.push('/(tabs)/Overview/cycletracking');
     } else if (id === 'sleep') {
       router.push('/(tabs)/Overview/sleep');
-=======
-    }else if (id === 'cycle') {
-      console.log('Navigating to cycle...');
-      router.push('/(tabs)/Overview/cycletracking');
->>>>>>> d72d46e7172116249f75167c2c98151eb9c5c3b3
     }
   };
 
