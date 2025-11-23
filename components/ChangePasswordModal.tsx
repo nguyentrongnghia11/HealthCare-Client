@@ -80,7 +80,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ visibl
 
     setLoading(true)
     try {
-      await instance.put('/user/me/password', {
+      await instance.patch('/auth/change-password', {
         currentPassword,
         newPassword,
       })
