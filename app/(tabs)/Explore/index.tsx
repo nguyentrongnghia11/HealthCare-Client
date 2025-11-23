@@ -56,15 +56,6 @@ const ExploreScreen = () => {
           style={styles.searchInput}
           outlineStyle={{ borderWidth: 0 }}
         />
-        <TouchableOpacity style={styles.avatarContainer}>
-          <Image
-            source={{
-              uri: "https://randomuser.me/api/portraits/women/44.jpg",
-            }}
-            style={styles.avatar}
-          />
-          <View style={styles.onlineDot} />
-        </TouchableOpacity>
       </View>
 
       {/* For You section */}

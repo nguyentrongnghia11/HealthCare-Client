@@ -74,9 +74,6 @@ export default function ThisWeekReport() {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={[styles.title, { color: colors.text }]}>This week report</Text>
-        <TouchableOpacity>
-          <Text style={[styles.viewMore, { color: colors.textSecondary }]}>View more →</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.grid}>
