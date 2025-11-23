@@ -49,7 +49,7 @@ export default function TabOneScreen() {
 
     fetchData();
   }, []);
-
+//them cycle tracking
   const handleMetricPress = (id: string) => {
     console.log('Metric pressed:', id);
     if (id === 'calories') {
