@@ -1,39 +1,34 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getWeeklyCalories } from "../../api/nutrition";
-import { getWeeklyStats, WeeklyStats } from "../../api/overview";
+import { getWeeklySummary, WeeklySummary } from "../../api/overview";
 import { Colors, useTheme } from "../../contexts/ThemeContext";
 import StatsChartModal from "./StatsChartModal";
 
 export default function ThisWeekReport() {
   const { isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
-  const [stats, setStats] = useState<WeeklyStats | null>(null);
-  const [weeklyCalories, setWeeklyCalories] = useState(0);
+  const [summary, setSummary] = useState<WeeklySummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedStat, setSelectedStat] = useState<{ type: 'steps' | 'calories' | 'water' | 'sleep', title: string } | null>(null);
+  const [selectedStat, setSelectedStat] = useState<{ type: 'steps' | 'calories' | 'cycle' | 'sleep', title: string } | null>(null);
 
   const loadWeeklyStats = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [statsData, caloriesData] = await Promise.all([
-        getWeeklyStats(),
-        getWeeklyCalories(),
-      ]);
-      setStats(statsData);
-      setWeeklyCalories(caloriesData);
+      const data = await getWeeklySummary();
+      setSummary(data);
     } catch (error) {
-      console.error('Error loading weekly stats:', error);
+      console.error('Error loading weekly summary:', error);
       // Use default values on error
-      setStats({
-        steps: 0,
-        caloriesBurned: 0,
-        waterMl: 0,
-        sleepMinutes: 0,
+      setSummary({
+        weeklyCaloriesConsumed: 0,
+        weeklySleepHours: 0,
+        weeklySteps: 0,
+        weeklyAvgCaloriesFromMeals: 0,
+        weeklyCaloriesBurned: 0,
+        nextPeriodPrediction: '',
       });
-      setWeeklyCalories(0);
     } finally {
       setIsLoading(false);
     }
@@ -46,13 +41,20 @@ export default function ThisWeekReport() {
     }, [loadWeeklyStats])
   );
 
-  const formatSleepTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}min`;
+  const formatSleepTime = (hours: number) => {
+    return `${hours}h`;
   };
 
-  const handleCardPress = (type: 'steps' | 'calories' | 'water' | 'sleep', title: string) => {
+  const getDaysUntilPeriod = (prediction: string) => {
+    if (!prediction) return 0;
+    const today = new Date();
+    const predictedDate = new Date(prediction);
+    const diffTime = predictedDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const handleCardPress = (type: 'steps' | 'calories' | 'cycle' | 'sleep', title: string) => {
     setSelectedStat({ type, title });
     setModalVisible(true);
   };
@@ -86,7 +88,7 @@ export default function ThisWeekReport() {
             <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Steps</Text>
           </View>
           <Text style={[styles.itemValue, { color: colors.text }]}>
-            {stats?.steps.toLocaleString() || '0'}
+            {summary?.weeklySteps.toLocaleString() || '0'}
           </Text>
         </TouchableOpacity>
 
@@ -99,20 +101,20 @@ export default function ThisWeekReport() {
               <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Calories</Text>
             </View>
             <Text style={[styles.itemValue, { color: colors.text }]}>
-              {weeklyCalories.toLocaleString()} kcal
+              {summary?.weeklyCaloriesConsumed.toLocaleString() || '0'} kcal
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={[styles.reportItem, { backgroundColor: colors.surface, borderColor: isDark ? '#00D2E6' : '#27b315' }]}
-            onPress={() => handleCardPress('water', 'Water Intake')}
+            onPress={() => handleCardPress('cycle', 'Cycle Tracking')}
           >
             <View style={styles.iconContainer}>
-              <Text style={styles.icon}>💧</Text>
-              <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Water</Text>
+              <Text style={styles.icon}>📅</Text>
+              <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Cycle</Text>
             </View>
             <Text style={[styles.itemValue, { color: colors.text }]}>
-              {stats?.waterMl.toLocaleString() || '0'} ml
+              {summary ? getDaysUntilPeriod(summary.nextPeriodPrediction) : '0'} days
             </Text>
           </TouchableOpacity>
 
@@ -125,7 +127,7 @@ export default function ThisWeekReport() {
               <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Sleep</Text>
             </View>
             <Text style={[styles.itemValue, { color: colors.text }]}>
-              {stats ? formatSleepTime(stats.sleepMinutes) : '0h 0min'}
+              {summary ? formatSleepTime(summary.weeklySleepHours) : '0h'}
             </Text>
           </TouchableOpacity>
       </View>

@@ -7,7 +7,7 @@ import { Colors, useTheme } from '../../contexts/ThemeContext';
 interface StatsChartModalProps {
   visible: boolean;
   onClose: () => void;
-  type: 'steps' | 'calories' | 'water' | 'sleep';
+  type: 'steps' | 'calories' | 'cycle' | 'sleep';
   title: string;
 }
 
@@ -61,8 +61,8 @@ export default function StatsChartModal({ visible, onClose, type, title }: Stats
         return { icon: '👟', unit: 'steps' };
       case 'calories':
         return { icon: '🔥', unit: 'kcal' };
-      case 'water':
-        return { icon: '💧', unit: 'ml' };
+      case 'cycle':
+        return { icon: '📅', unit: 'days' };
       case 'sleep':
         return { icon: '😴', unit: 'hours' };
       default:
