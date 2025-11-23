@@ -3,15 +3,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    Linking,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { ChangePasswordModal } from '../../../components/ChangePasswordModal';
 import { Colors, useTheme } from '../../../contexts/ThemeContext';
@@ -205,11 +205,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <Text style={styles.headerSubtitle}>Manage your preferences</Text>
-      </View>
+    
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {settingsSections.map((section, index) => (

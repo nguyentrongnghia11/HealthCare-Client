@@ -1,13 +1,13 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { getNutritionStats, getRunningStats, StatsResponse } from '../../api/overview';
+import { getNutritionStats, getRunningStats, getSleepStats, StatsResponse } from '../../api/overview';
 import { Colors, useTheme } from '../../contexts/ThemeContext';
 
 interface StatsChartModalProps {
   visible: boolean;
   onClose: () => void;
-  type: 'steps' | 'calories' | 'water' | 'sleep';
+  type: 'steps' | 'calories' | 'cycle' | 'sleep';
   title: string;
 }
 
@@ -38,8 +38,10 @@ export default function StatsChartModal({ visible, onClose, type, title }: Stats
         data = await getRunningStats(startDate, endDate);
       } else if (type === 'calories') {
         data = await getNutritionStats(startDate, endDate);
+      } else if (type === 'sleep') {
+        data = await getSleepStats(startDate, endDate);
       } else {
-        // For water and sleep, we'll use mock data for now
+        // For cycle and other types, use empty data
         data = {
           stats: [],
           chartData: { labels: [], datasets: {} },
@@ -61,8 +63,8 @@ export default function StatsChartModal({ visible, onClose, type, title }: Stats
         return { icon: '👟', unit: 'steps' };
       case 'calories':
         return { icon: '🔥', unit: 'kcal' };
-      case 'water':
-        return { icon: '💧', unit: 'ml' };
+      case 'cycle':
+        return { icon: '📅', unit: 'days' };
       case 'sleep':
         return { icon: '😴', unit: 'hours' };
       default:
@@ -128,6 +130,8 @@ export default function StatsChartModal({ visible, onClose, type, title }: Stats
                     <Text style={[styles.chartTitle, { color: colors.text }]}>Daily Breakdown</Text>
                     {statsData.chartData.labels.map((label, index) => {
                       const datasets = statsData.chartData.datasets;
+                      console.log  ('Datasets:', datasets);
+                      console.log ('Label:', label, 'Index:', index);
                       const firstDatasetKey = Object.keys(datasets)[0];
                       const value = datasets[firstDatasetKey]?.[index] || 0;
                       
@@ -245,7 +249,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   chartCard: {
-    padding: 16,
+    padding: 35,
     borderRadius: 12,
   },
   chartTitle: {
@@ -266,7 +270,7 @@ const styles = StyleSheet.create({
   },
   chartBarContainer: {
     flex: 1,
-    height: 24,
+    height: 20,
     backgroundColor: '#F0F0F0',
     borderRadius: 12,
     overflow: 'hidden',

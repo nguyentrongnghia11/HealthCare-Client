@@ -58,7 +58,7 @@ export const logout = async () => {
         return true;
     } catch (error) {
         console.error('Logout error:', error);
-        return true; // Still logout locally even if backend call fails
+        return true; 
     }
 }
 

@@ -270,6 +270,9 @@ export default function CycleTrackingPage() {
                 </View>
             </View>
 
+<<<<<<< HEAD
+          
+=======
             {/* Menstrual health */}
             {/* Vui lòng bỏ comment (uncomment) phần này nếu bạn muốn hiển thị lại, đảm bảo đã import 'Image' từ react-native */}
             {/*
@@ -313,6 +316,7 @@ export default function CycleTrackingPage() {
             {/* ------------------------------------ */}
             
             {/* Modal Nhập ngày kinh */}
+>>>>>>> d72d46e7172116249f75167c2c98151eb9c5c3b3
             {isPeriodModalVisible && (
                 <LogPeriodModal 
                     visible={isPeriodModalVisible}

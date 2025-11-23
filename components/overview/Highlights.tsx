@@ -1,57 +1,61 @@
 import { useFocusEffect, useRouter } from "expo-router"
 import { useCallback, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
-import { getCalories } from "../../api/nutrition"
-import { getTodayRunningData } from "../../api/running"
+import { getTodaySummary, TodaySummary } from "../../api/overview"
 
 export default function Highlights() {
   const router = useRouter()
   
   // State for dynamic data
-  const [nutritionCalories, setNutritionCalories] = useState(0)
-  const [runningKm, setRunningKm] = useState(0)
+  const [todaySummary, setTodaySummary] = useState<TodaySummary | null>(null)
   
-  // Fetch nutrition data
-  const fetchNutritionData = useCallback(async () => {
+  // Fetch today's summary data
+  const fetchTodaySummary = useCallback(async () => {
     try {
-      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-      const data = await getCalories(today)
-      
-      // Calculate total calories from meals
-      const totalCals = data.meals?.reduce((sum, meal) => {
-        return sum + (meal.calories || 0)
-      }, 0) || 0
-      
-      setNutritionCalories(Math.round(totalCals))
+      const data = await getTodaySummary()
+      setTodaySummary(data)
     } catch (error) {
-      console.error('Failed to fetch nutrition data:', error)
-    }
-  }, [])
-  
-  // Fetch running data
-  const fetchRunningData = useCallback(async () => {
-    try {
-      const data = await getTodayRunningData()
-      const totalKm = data.summary?.totalDistanceKm || 0
-      setRunningKm(totalKm)
-    } catch (error) {
-      console.error('Failed to fetch running data:', error)
+      console.error('Failed to fetch today summary:', error)
     }
   }, [])
 
   // Refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      fetchNutritionData()
-      fetchRunningData()
-    }, [fetchNutritionData, fetchRunningData])
+      fetchTodaySummary()
+    }, [fetchTodaySummary])
   )
+
+  const formatSleepTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours}h ${mins}min`
+  }
+
+  const calculateSleepDuration = (bedtime: string, wakeup: string) => {
+    const [bedHour, bedMin] = bedtime.split(':').map(Number)
+    const [wakeHour, wakeMin] = wakeup.split(':').map(Number)
+    
+    let bedTimeInMinutes = bedHour * 60 + bedMin
+    let wakeTimeInMinutes = wakeHour * 60 + wakeMin
+    
+    // If wakeup time is earlier than bedtime, it means next day
+    if (wakeTimeInMinutes < bedTimeInMinutes) {
+      wakeTimeInMinutes += 24 * 60
+    }
+    
+    const totalMinutes = wakeTimeInMinutes - bedTimeInMinutes
+    const hours = Math.floor(totalMinutes / 60)
+    const mins = totalMinutes % 60
+    
+    return `${hours}h ${mins}min`
+  }
 
   const handlePress = (item: any) => {
     if (item.title === "Sleep") {
       router.push("/Overview/sleep")
     }
-     if (item.title === "Cycle tracking") {
+    if (item.title === "Cycle tracking") {
       router.push("/Overview/cycletracking")
     }
   }
@@ -60,7 +64,7 @@ export default function Highlights() {
     {
       id: 1,
       title: "Steps",
-      value: runningKm.toFixed(2),
+      value: todaySummary?.distanceKm.toFixed(2) || "0",
       subtitle: "km today",
       backgroundColor: "#00BFFF",
       icon: "🏃‍♂️",
@@ -69,9 +73,9 @@ export default function Highlights() {
     {
       id: 2,
       title: "Cycle tracking",
-      value: "12",
+      value: todaySummary?.cycle.daysUntilNextPeriod.toString() || "0",
       subtitle: "days before period",
-      updateText: "updated 30m ago",
+      updateText: `${todaySummary?.cycle.phase || 'unknown'}`,
       backgroundColor: "#FF6B6B",
       icon: "📅",
       link: "/(tabs)/Overview/cycletracking",
@@ -79,17 +83,19 @@ export default function Highlights() {
     {
       id: 3,
       title: "Sleep",
-      value: "7h 31min",
-      subtitle: "updated a day ago",
+      value: todaySummary?.sleep.bedtime && todaySummary?.sleep.wakeup 
+        ? calculateSleepDuration(todaySummary.sleep.bedtime, todaySummary.sleep.wakeup)
+        : "0h 0min",
+      subtitle: todaySummary?.sleep.wakeup ? `wake up at ${todaySummary.sleep.wakeup}` : "no data",
       backgroundColor: "#2C3E50",
       icon: "🌙",
     },
     {
       id: 4,
       title: "Nutrition",
-      value: nutritionCalories.toString(),
+      value: todaySummary?.nutrition.totalCalories.toString() || "0",
       subtitle: "kcal consumed",
-      updateText: "today",
+      updateText: `${todaySummary?.nutrition.mealsCount || 0} meals`,
       backgroundColor: "#FF8C00",
       icon: "🥤",
       link: "/(tabs)/Explore/nutrition",
@@ -100,9 +106,6 @@ export default function Highlights() {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Highlights</Text>
-        <TouchableOpacity>
-          <Text style={styles.viewMore}>View more →</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.grid}>

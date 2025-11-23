@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   values: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "baseline",
   },
   value: {
     fontSize: 20,

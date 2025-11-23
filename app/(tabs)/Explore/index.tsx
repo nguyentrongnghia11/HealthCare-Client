@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-paper";
-import { getPosts } from '../../../api/posts'
+import { getPosts } from '../../../api/posts';
 
 const ExploreScreen = () => {
   const router = useRouter();
 
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     let mounted = true
     const load = async () => {
       try {
         const data = await getPosts()
+          console.log("Fetched posts for Explore:", data);
         if (mounted && Array.isArray(data)) setPosts(data)
       } catch (err) {
         console.error('Failed to load posts for Explore', err)
@@ -28,9 +31,9 @@ const ExploreScreen = () => {
   }, [])
 
   const categories = [
-    { id: "1", icon: "apple-alt", label: "Nutrition", color: "#E0F7E9" },
-    { id: "2", icon: "running", label: "Sports", color: "#E6F0FF" },
-    { id: "3", icon: "shoe-prints", label: "Running", color: "#FFF0F5" },
+    { id: "1", icon: "apple-alt", label: "Nutrition", type: "nutrition", color: "#E0F7E9" },
+    { id: "2", icon: "futbol", label: "Sport", type: "sport", color: "#E6F0FF" },
+    { id: "3", icon: "dumbbell", label: "Workout", type: "work_out", color: "#FFF0F5" },
   ];
 
   const blogs = posts && posts.length > 0 ? posts : [
@@ -52,14 +55,30 @@ const ExploreScreen = () => {
     },
   ];
 
-  const handleCategoryPress = (item: { id: string; label: string }) => {
-    console.log("Category clicked:", item.label);
-    // 👉 Bạn có thể điều hướng sang màn hình khác, ví dụ:
+  // Filter blogs based on selected category and search query
+  const filteredBlogs = blogs.filter(blog => {
+    // Filter by category
+    const matchesCategory = selectedCategory 
+      ? (blog.type || '').toLowerCase() === selectedCategory.toLowerCase()
+      : true;
+    
+    // Filter by search query
+    const matchesSearch = searchQuery
+      ? (blog.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (blog.content || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (blog.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    
+    return matchesCategory && matchesSearch;
+  });
 
-    if (item.label === "Running") {
-      router.push(`/(tabs)/Explore/step_stracker`);
+  const handleCategoryPress = (item: { id: string; label: string; type: string }) => {
+    console.log("Category clicked:", item.label);
+    // Toggle category selection
+    if (selectedCategory === item.type) {
+      setSelectedCategory(null); // Deselect if already selected
     } else {
-      router.push(`/(tabs)/Explore/nutrition`);
+      setSelectedCategory(item.type); // Select category to filter posts
     }
   };
 
@@ -70,19 +89,13 @@ const ExploreScreen = () => {
         <TextInput
           mode="outlined"
           placeholder="Search topic"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
           left={<TextInput.Icon icon="magnify" />}
+          right={searchQuery ? <TextInput.Icon icon="close" onPress={() => setSearchQuery('')} /> : undefined}
           style={styles.searchInput}
           outlineStyle={{ borderWidth: 0 }}
         />
-        <TouchableOpacity style={styles.avatarContainer}>
-          <Image
-            source={{
-              uri: "https://randomuser.me/api/portraits/women/44.jpg",
-            }}
-            style={styles.avatar}
-          />
-          <View style={styles.onlineDot} />
-        </TouchableOpacity>
       </View>
 
       {/* For You section */}
@@ -94,7 +107,11 @@ const ExploreScreen = () => {
         {categories.map((item) => (
           <TouchableOpacity
             key={item.id}
-            style={[styles.categoryItem, { backgroundColor: item.color }]}
+            style={[
+              styles.categoryItem, 
+              { backgroundColor: item.color },
+              selectedCategory === item.type && styles.categoryItemSelected
+            ]}
             activeOpacity={0.7}
             onPress={() => handleCategoryPress(item)}
           >
@@ -107,13 +124,19 @@ const ExploreScreen = () => {
 
       {/* Newest Blogs */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Newest blogs</Text>
-        <Text style={styles.viewMore}>View more ›</Text>
+        <Text style={styles.sectionTitle}>
+          {selectedCategory ? `${categories.find(c => c.type === selectedCategory)?.label} Blogs` : 'Newest blogs'}
+        </Text>
+        <TouchableOpacity onPress={() => setSelectedCategory(null)}>
+          <Text style={styles.viewMore}>
+            {selectedCategory ? 'Clear filter' : 'View more ›'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
         horizontal
-        data={blogs}
+        data={filteredBlogs}
         keyExtractor={(item) => (item._id || item.id).toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -126,13 +149,18 @@ const ExploreScreen = () => {
           >
             <Image source={{ uri: item.image || item.imageUrl }} style={styles.blogImage} />
             <View style={styles.blogContent}>
-              <Text style={styles.blogCategory}>{item.category || item.excerpt}</Text>
-              <Text style={styles.blogTitle}>{item.title}</Text>
+              <Text style={styles.blogCategory} numberOfLines={1}>{item.category || item.excerpt}</Text>
+              <Text style={styles.blogTitle} numberOfLines={2}>{item.title}</Text>
               <Text style={styles.blogVotes}>{item.votes ? `💙 ${item.votes} votes` : ''}</Text>
             </View>
           </TouchableOpacity>
         )}
         showsHorizontalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No blogs found for "{selectedCategory}"</Text>
+          </View>
+        }
       />
     </ScrollView>
   );
@@ -203,12 +231,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginHorizontal: 4,
   },
+  categoryItemSelected: {
+    borderWidth: 2,
+    borderColor: "#22C55E",
+  },
   categoryLabel: {
     marginTop: 6,
     fontWeight: "500",
   },
   blogCard: {
     width: 220,
+    height: 300,
     backgroundColor: "#fff",
     borderRadius: 16,
     marginRight: 12,
@@ -222,6 +255,7 @@ const styles = StyleSheet.create({
   },
   blogContent: {
     padding: 12,
+    flex: 1,
   },
   blogCategory: {
     fontSize: 13,
@@ -235,5 +269,14 @@ const styles = StyleSheet.create({
   blogVotes: {
     fontSize: 13,
     color: "#3B82F6",
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#6B7280",
   },
 });
