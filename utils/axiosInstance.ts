@@ -3,7 +3,7 @@ import axios from 'axios';
 import { router } from 'expo-router';
 
 const instance = axios.create({
-  baseURL: 'http://10.179.99.160:3000',
+  baseURL: 'http://192.168.1.3:3000',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

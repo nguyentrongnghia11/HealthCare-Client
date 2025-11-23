@@ -1,7 +1,13 @@
+import React, { useEffect, useState } from 'react'
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useRouter } from "expo-router";
+import { getPosts } from '../../api/posts'
+
 export default function Blogs() {
   const router = useRouter();
+  const [posts, setPosts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
   const blogData = [
     {
       id: 1,
@@ -20,9 +26,24 @@ export default function Blogs() {
       backgroundColor: "#2C5F5D",
     },
   ]
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const data = await getPosts()
+        if (mounted && Array.isArray(data)) setPosts(data)
+      } catch (err) {
+        console.error('Failed to load blog posts', err)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
 
   const handleViewMore = () => {
-    router.push("/Overview/BlogListScreen"); 
+    router.push("/(tabs)/Overview/BlogListScreen");
   };
   return (
     <View style={styles.container}>
@@ -34,17 +55,28 @@ export default function Blogs() {
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-        {blogData.map((blog) => (
-          <TouchableOpacity key={blog.id} style={styles.blogCard}>
-            <View style={[styles.imageContainer, { backgroundColor: blog.backgroundColor }]}>
-              <Image source={{ uri: blog.image }} style={styles.blogImage} />
+        {(posts && posts.length > 0 ? posts.slice(0, 2) : blogData).map((blog: any) => (
+          <TouchableOpacity
+            key={blog._id || blog.id}
+            style={styles.blogCard}
+            activeOpacity={0.8}
+            onPress={() => {
+              const id = blog.id || blog._id
+              if (id) router.push({ pathname: '/(tabs)/Overview/BlogDetailScreen', params: { id } })
+            }}
+          >
+            <View style={[styles.imageContainer, { backgroundColor: blog.backgroundColor || '#ddd' }] }>
+              <Image source={{ uri: blog.image || blog.imageUrl }} style={styles.blogImage} />
             </View>
             <View style={styles.blogContent}>
-              <Text style={styles.blogCategory}>{blog.category}</Text>
+              <Text style={styles.blogCategory}>{blog.category || blog.excerpt}</Text>
               <Text style={styles.blogTitle}>{blog.title}</Text>
               <View style={styles.blogFooter}>
-                <Text style={styles.blogVotes}>👍 {blog.votes}</Text>
-                <TouchableOpacity>
+                <Text style={styles.blogVotes}>👍 {blog.votes || ''}</Text>
+                <TouchableOpacity onPress={() => {
+                  const id = blog.id || blog._id
+                  if (id) router.push({ pathname: '/(tabs)/Overview/BlogDetailScreen', params: { id } })
+                }}>
                   <Text style={styles.tellMeMore}>Tell me more →</Text>
                 </TouchableOpacity>
               </View>

@@ -1,9 +1,31 @@
+import React, { useEffect, useState } from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-paper";
+import { getPosts } from '../../../api/posts'
 
 const ExploreScreen = () => {
+  const router = useRouter();
+
+  const [posts, setPosts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
+      try {
+        const data = await getPosts()
+        if (mounted && Array.isArray(data)) setPosts(data)
+      } catch (err) {
+        console.error('Failed to load posts for Explore', err)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    load()
+    return () => { mounted = false }
+  }, [])
 
   const categories = [
     { id: "1", icon: "apple-alt", label: "Nutrition", color: "#E0F7E9" },
@@ -11,7 +33,7 @@ const ExploreScreen = () => {
     { id: "3", icon: "shoe-prints", label: "Running", color: "#FFF0F5" },
   ];
 
-  const blogs = [
+  const blogs = posts && posts.length > 0 ? posts : [
     {
       id: "1",
       title: "More about Apples: Benefits, nutrition, and tips",
@@ -35,12 +57,8 @@ const ExploreScreen = () => {
     // 👉 Bạn có thể điều hướng sang màn hình khác, ví dụ:
 
     if (item.label === "Running") {
-      console.log(123)
       router.push(`/(tabs)/Explore/step_stracker`);
-
-    }
-    else {
-
+    } else {
       router.push(`/(tabs)/Explore/nutrition`);
     }
   };
@@ -87,25 +105,26 @@ const ExploreScreen = () => {
       <FlatList
         horizontal
         data={blogs}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => (item._id || item.id).toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.blogCard}>
-            <Image source={{ uri: item.image }} style={styles.blogImage} />
+          <TouchableOpacity
+            style={styles.blogCard}
+            activeOpacity={0.8}
+            onPress={() => {
+              const id = item.id || item._id
+              if (id) router.push({ pathname: '/(tabs)/Overview/BlogDetailScreen', params: { id } })
+            }}
+          >
+            <Image source={{ uri: item.image || item.imageUrl }} style={styles.blogImage} />
             <View style={styles.blogContent}>
-              <Text style={styles.blogCategory}>{item.category}</Text>
+              <Text style={styles.blogCategory}>{item.category || item.excerpt}</Text>
               <Text style={styles.blogTitle}>{item.title}</Text>
-              <Text style={styles.blogVotes}>💙 {item.votes} votes</Text>
+              <Text style={styles.blogVotes}>{item.votes ? `💙 ${item.votes} votes` : ''}</Text>
             </View>
           </TouchableOpacity>
         )}
         showsHorizontalScrollIndicator={false}
       />
-
-      {/* Collection */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Collection</Text>
-        <Text style={styles.viewMore}>View more ›</Text>
-      </View>
     </ScrollView>
   );
 };
