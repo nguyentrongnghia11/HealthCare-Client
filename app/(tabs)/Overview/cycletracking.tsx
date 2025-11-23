@@ -83,14 +83,14 @@ export default function CycleTrackingPage() {
     
     // States dữ liệu
     const [lastPeriodStartDate, setLastPeriodStartDate] = useState<Date | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true) // LOADING IS TRUE INITIALLY
     const [symptomsLog, setSymptomsLog] = useState<string[]>([]) 
 
     // Hàm refresh data chính
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            // LƯU Ý: Đảm bảo path của file 'api/cycle' là chính xác.
+            // Đây là nơi chờ đợi kết quả từ API, gây ra độ trễ.
             const statusResponse: CycleStatusResponse = await fetchCycleStatus(selectedDate.toISOString().split('T')[0]);
             
             if (statusResponse && statusResponse.latestLog && statusResponse.latestLog.startDate) {
@@ -101,7 +101,7 @@ export default function CycleTrackingPage() {
         } catch (error) {
             console.error("Failed to fetch cycle status:", error);
         } finally {
-            setLoading(false);
+            setLoading(false); // UI chính chỉ render sau khi hàm này kết thúc
         }
     }, [selectedDate]);
 
@@ -270,7 +270,53 @@ export default function CycleTrackingPage() {
                 </View>
             </View>
 
+<<<<<<< HEAD
           
+=======
+            {/* Menstrual health */}
+            {/* Vui lòng bỏ comment (uncomment) phần này nếu bạn muốn hiển thị lại, đảm bảo đã import 'Image' từ react-native */}
+            {/*
+            <View style={styles.section}>
+                <View style={styles.rowBetween}>
+                    <Text style={styles.sectionTitle}>Menstrual health</Text>
+                    <TouchableOpacity>
+                        <Text style={styles.viewMore}>View more</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.row}>
+                    <View style={styles.healthCard}>
+                        <Image
+                            source={{ uri: "https://placehold.co/400x150/06b6d4/ffffff?text=Cravings" }}
+                            style={styles.image}
+                            onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+                        />
+                        <Text style={styles.healthText}>
+                            Craving sweets on your period? Here's why & what to do about it
+                        </Text>
+                    </View>
+
+                    <View style={styles.healthCard}>
+                          <Image
+                            source={{ uri: "https://placehold.co/400x150/a855f7/ffffff?text=BirthControl" }}
+                            style={styles.image}
+                            onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+                        />
+                        <Text style={styles.healthText}>
+                            Is birth control bad for your menstrual health?
+                        </Text>
+                    </View>
+                </View>
+            </View>
+            */}
+
+
+            {/* ------------------------------------ */}
+            {/* MODALS */}
+            {/* ------------------------------------ */}
+            
+            {/* Modal Nhập ngày kinh */}
+>>>>>>> d72d46e7172116249f75167c2c98151eb9c5c3b3
             {isPeriodModalVisible && (
                 <LogPeriodModal 
                     visible={isPeriodModalVisible}
