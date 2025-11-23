@@ -73,7 +73,7 @@ export default function Highlights() {
     {
       id: 2,
       title: "Cycle tracking",
-      value: todaySummary?.cycle.daysUntilNextPeriod.toString() || "0",
+      value: todaySummary?.cycle?.daysUntilNextPeriod.toString() || "0",
       subtitle: "days before period",
       updateText: `${todaySummary?.cycle.phase || 'unknown'}`,
       backgroundColor: "#FF6B6B",
