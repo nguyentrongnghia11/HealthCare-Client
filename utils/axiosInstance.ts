@@ -3,7 +3,7 @@ import axios from 'axios';
 import { router } from 'expo-router';
 
 const instance = axios.create({
-  baseURL: 'http://192.168.1.3:3000',
+  baseURL: 'http://10.18.135.159:3000',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ instance.interceptors.response.use(
 
       // Call refresh endpoint - use the same baseURL
       const response = await axios.post(
-        'http://192.168.1.3:3000/auth/refresh',
+        'http://10.18.135.159:3000/auth/refresh',
         { refreshToken },
         {
           headers: {
