@@ -2,6 +2,7 @@ import { Link, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { getCalories } from '../../../api/nutrition';
+import { getTodaySummary } from '../../../api/overview';
 import { getTodayRunningData } from '../../../api/running';
 import back from '../../../assets/images/overview/back.png';
 import { HealthMetricCard } from '../../../components/HealthMetricCard';
@@ -12,6 +13,8 @@ export default function TabOneScreen() {
   const router = useRouter();
   const [runningKm, setRunningKm] = useState(0);
   const [caloriesBurned, setCaloriesBurned] = useState(0);
+  const [sleepHours, setSleepHours] = useState(0);
+  const [sleepMinutes, setSleepMinutes] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,26 +24,35 @@ export default function TabOneScreen() {
         
         // Fetch running data
         const runningData = await getTodayRunningData();
-        console.log('Running data response:', runningData);
         if (runningData.summary) {
-          console.log('Total distance km:', runningData.summary.totalDistanceKm);
           setRunningKm(runningData.summary.totalDistanceKm || 0);
         }
 
         // Fetch nutrition data with date
         const nutritionData = await getCalories(dateStr);
-        console.log('Nutrition data response:', nutritionData);
-        console.log('Nutrition data meals:', nutritionData.meals);
-        
         if (nutritionData && nutritionData.meals && Array.isArray(nutritionData.meals)) {
           const totalCalories = nutritionData.meals.reduce((sum: number, meal: any) => {
-            console.log('Meal calories:', meal.calories);
             return sum + (meal.calories || 0);
           }, 0);
-          console.log('Total calories calculated:', totalCalories);
           setCaloriesBurned(totalCalories);
-        } else {
-          console.log('No meals data found or invalid format');
+        }
+
+        // Fetch today summary for sleep data
+        const todaySummary = await getTodaySummary();
+        if (todaySummary?.sleep?.bedtime && todaySummary?.sleep?.wakeup) {
+          const [bedHour, bedMin] = todaySummary.sleep.bedtime.split(':').map(Number);
+          const [wakeHour, wakeMin] = todaySummary.sleep.wakeup.split(':').map(Number);
+          
+          let bedTimeInMinutes = bedHour * 60 + bedMin;
+          let wakeTimeInMinutes = wakeHour * 60 + wakeMin;
+          
+          if (wakeTimeInMinutes < bedTimeInMinutes) {
+            wakeTimeInMinutes += 24 * 60;
+          }
+          
+          const totalMinutes = wakeTimeInMinutes - bedTimeInMinutes;
+          setSleepHours(Math.floor(totalMinutes / 60));
+          setSleepMinutes(totalMinutes % 60);
         }
       } catch (error) {
         console.error('Failed to fetch health data:', error);
@@ -51,29 +63,21 @@ export default function TabOneScreen() {
   }, []);
 
   const handleMetricPress = (id: string) => {
-    console.log('Metric pressed:', id);
     if (id === 'calories') {
-      console.log('Navigating to nutrition...');
       router.push('/(tabs)/Explore/nutrition');
     } else if (id === 'steps') {
-      console.log('Navigating to step_stracker...');
       router.push('/(tabs)/Explore/step_stracker');
+    } else if (id === 'cycle') {
+      router.push('/(tabs)/Overview/cycletracking');
+    } else if (id === 'sleep') {
+      router.push('/(tabs)/Overview/sleep');
     }
   };
 
   const healthMetrics = [
     {
-      id: "double-support",
-      title: "Double Support Time",
-      value: "29.7",
-      unit: "%",
-      icon: "🎯",
-      color: "bg-cyan-500",
-      iconBg: "bg-cyan-100",
-    },
-    {
       id: "steps",
-      title: "Steps",
+      title: "Distance",
       value: runningKm > 0 ? runningKm.toFixed(2) : "0.00",
       unit: "km",
       icon: "👟",
@@ -92,9 +96,9 @@ export default function TabOneScreen() {
     {
       id: "sleep",
       title: "Sleep",
-      value: "7",
+      value: sleepHours.toString(),
       unit: "hr",
-      secondaryValue: "31",
+      secondaryValue: sleepMinutes.toString(),
       secondaryUnit: "min",
       icon: "🛏️",
       color: "bg-red-500",
@@ -108,15 +112,6 @@ export default function TabOneScreen() {
       icon: "🔥",
       color: "bg-blue-500",
       iconBg: "bg-blue-100",
-    },
-    {
-      id: "bmi",
-      title: "Body mass index",
-      value: "18.69",
-      unit: "BMI",
-      icon: "⚖️",
-      color: "bg-cyan-500",
-      iconBg: "bg-cyan-100",
     },
   ];
 

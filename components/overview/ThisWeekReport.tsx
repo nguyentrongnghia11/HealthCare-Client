@@ -81,14 +81,14 @@ export default function ThisWeekReport() {
       <View style={styles.grid}>
         <TouchableOpacity 
           style={[styles.reportItem, { backgroundColor: colors.surface, borderColor: isDark ? '#00D2E6' : '#27b315' }]}
-          onPress={() => handleCardPress('steps', 'Steps')}
+          onPress={() => handleCardPress('steps', 'Distance')}
         >
           <View style={styles.iconContainer}>
             <Text style={styles.icon}>👟</Text>
-            <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Steps</Text>
+            <Text style={[styles.itemTitle, { color: colors.textSecondary }]}>Distance</Text>
           </View>
           <Text style={[styles.itemValue, { color: colors.text }]}>
-            {summary?.weeklySteps.toLocaleString() || '0'}
+            {summary?.weeklySteps.toFixed(2) || '0'} km
           </Text>
         </TouchableOpacity>
 

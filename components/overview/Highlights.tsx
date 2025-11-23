@@ -32,6 +32,25 @@ export default function Highlights() {
     return `${hours}h ${mins}min`
   }
 
+  const calculateSleepDuration = (bedtime: string, wakeup: string) => {
+    const [bedHour, bedMin] = bedtime.split(':').map(Number)
+    const [wakeHour, wakeMin] = wakeup.split(':').map(Number)
+    
+    let bedTimeInMinutes = bedHour * 60 + bedMin
+    let wakeTimeInMinutes = wakeHour * 60 + wakeMin
+    
+    // If wakeup time is earlier than bedtime, it means next day
+    if (wakeTimeInMinutes < bedTimeInMinutes) {
+      wakeTimeInMinutes += 24 * 60
+    }
+    
+    const totalMinutes = wakeTimeInMinutes - bedTimeInMinutes
+    const hours = Math.floor(totalMinutes / 60)
+    const mins = totalMinutes % 60
+    
+    return `${hours}h ${mins}min`
+  }
+
   const handlePress = (item: any) => {
     if (item.title === "Sleep") {
       router.push("/Overview/sleep")
@@ -45,8 +64,8 @@ export default function Highlights() {
     {
       id: 1,
       title: "Steps",
-      value: todaySummary?.steps.toLocaleString() || "0",
-      subtitle: "steps today",
+      value: todaySummary?.distanceKm.toFixed(2) || "0",
+      subtitle: "km today",
       backgroundColor: "#00BFFF",
       icon: "🏃‍♂️",
       link: "/(tabs)/Explore/step_stracker",
@@ -64,7 +83,9 @@ export default function Highlights() {
     {
       id: 3,
       title: "Sleep",
-      value: todaySummary ? formatSleepTime(todaySummary.sleepMinutes) : "0h 0min",
+      value: todaySummary?.sleep.bedtime && todaySummary?.sleep.wakeup 
+        ? calculateSleepDuration(todaySummary.sleep.bedtime, todaySummary.sleep.wakeup)
+        : "0h 0min",
       subtitle: todaySummary?.sleep.wakeup ? `wake up at ${todaySummary.sleep.wakeup}` : "no data",
       backgroundColor: "#2C3E50",
       icon: "🌙",
@@ -85,9 +106,6 @@ export default function Highlights() {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Highlights</Text>
-        <TouchableOpacity>
-          <Text style={styles.viewMore}>View more →</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.grid}>

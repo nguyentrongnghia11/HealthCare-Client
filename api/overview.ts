@@ -22,7 +22,7 @@ export interface TodaySummary {
     bedtime: string;
     wakeup: string;
   };
-  steps: number;
+  distanceKm: number;
   waterMl: number;
   sleepMinutes: number;
   nutrition: {
@@ -114,7 +114,7 @@ export async function getRunningStats(startDate: string, endDate: string): Promi
       params: {
         startDate,
         endDate,
-        groupBy: 'week',
+        groupBy: 'day',
       },
     });
     return response.data;
@@ -136,12 +136,34 @@ export async function getNutritionStats(startDate: string, endDate: string): Pro
       params: {
         startDate,
         endDate,
-        groupBy: 'week',
+        groupBy: 'day',
       },
     });
     return response.data;
   } catch (error: any) {
     console.error('Error fetching nutrition stats:', error.response?.data || error.message);
+    throw error;
+  }
+}
+
+/**
+ * Get sleep statistics for a date range
+ * @param startDate Start date in YYYY-MM-DD format
+ * @param endDate End date in YYYY-MM-DD format
+ * @returns Sleep stats grouped by day
+ */
+export async function getSleepStats(startDate: string, endDate: string): Promise<StatsResponse> {
+  try {
+    const response = await instance.get('/user/me/sleep/stats', {
+      params: {
+        startDate,
+        endDate,
+        groupBy: 'day',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching sleep stats:', error.response?.data || error.message);
     throw error;
   }
 }
@@ -165,7 +187,7 @@ export interface BlogPost {
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const response = await instance.get('/posts');
-    console.log('Fetched posts:', response.data);
+    // console.log('Fetched posts:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('Error fetching blog posts:', error.response?.data || error.message);

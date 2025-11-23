@@ -70,20 +70,17 @@ instance.interceptors.response.use(
       }
 
       console.log('📤 Calling refresh endpoint...');
-      
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
 
-      // Call refresh endpoint - use the same baseURL
-      const response = await axios.post(
-        'http://192.168.1.3:3000/auth/refresh',
+      // Call refresh endpoint using instance but mark to skip interceptor
+      const response = await instance.post(
+        '/auth/refresh',
         { refreshToken },
         {
           headers: {
             'Content-Type': 'application/json',
           },
-        }
+          _retry: true, // Mark to prevent interceptor loop
+        } as any
       );
 
       // Support both snake_case and camelCase response formats

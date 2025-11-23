@@ -270,48 +270,7 @@ export default function CycleTrackingPage() {
                 </View>
             </View>
 
-            {/* Menstrual health */}
-  {/*
-          <View style={styles.section}>
-                <View style={styles.rowBetween}>
-                    <Text style={styles.sectionTitle}>Menstrual health</Text>
-                    <TouchableOpacity>
-                        <Text style={styles.viewMore}>View more</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.row}>
-                    <View style={styles.healthCard}>
-                        <Image
-                            source={{ uri: "https://placehold.co/400x150/06b6d4/ffffff?text=Cravings" }}
-                            style={styles.image}
-                            onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
-                        />
-                        <Text style={styles.healthText}>
-                            Craving sweets on your period? Here's why & what to do about it
-                        </Text>
-                    </View>
-
-                    <View style={styles.healthCard}>
-                          <Image
-                            source={{ uri: "https://placehold.co/400x150/a855f7/ffffff?text=BirthControl" }}
-                            style={styles.image}
-                            onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
-                        />
-                        <Text style={styles.healthText}>
-                            Is birth control bad for your menstrual health?
-                        </Text>
-                    </View>
-                </View>
-            </View>
-*/}
-
-
-            {/* ------------------------------------ */}
-            {/* MODALS */}
-            {/* ------------------------------------ */}
-            
-            {/* Modal Nhập ngày kinh */}
+          
             {isPeriodModalVisible && (
                 <LogPeriodModal 
                     visible={isPeriodModalVisible}
